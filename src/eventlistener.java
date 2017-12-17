@@ -4,20 +4,27 @@ import com.jogamp.opengl.GLEventListener;
 
 public class eventlistener implements GLEventListener{
 
+    public static GL2 gl = null;
+    
     @Override
     public void display(GLAutoDrawable drawable) {
-	GL2 gl = drawable.getGL().getGL2();
+	gl = drawable.getGL().getGL2();
 	
-	gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
-    
-	gl.glColor3f(0,0,1);
-	gl.glBegin(GL2.GL_QUADS);
-	gl.glVertex2f(-1,-1);
-	gl.glVertex2f(1,-1);
-	gl.glVertex2f(1,1);
-	gl.glVertex2f(-1,1);
-	gl.glEnd();
-	
+	int a = 0;
+	for(int i = -3; i < 3; i++)
+	{
+	    for(int j = -3; j < 3; j++)
+	    {
+		if(j%2 == 1)
+		{
+		    a = 1;
+		}else
+		{
+		    a = 0;
+		}
+		graphics.fillHex(2*i+a,2*j,1);
+	    }
+	}
     }
 
     @Override

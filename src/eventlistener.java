@@ -10,19 +10,32 @@ public class eventlistener implements GLEventListener{
     public void display(GLAutoDrawable drawable) {
 	gl = drawable.getGL().getGL2();
 	
+	gl.glClearColor(0.1f, 0.1f, 0.1f, 1.0f );
+	gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
+	
+	gl.glMatrixMode(GL2.GL_PROJECTION);
+	gl.glLoadIdentity();
+	
+	float unitsTall = renderer.getWindowHeight()/ (renderer.getWindowWidth()/renderer.unitsWide);
+	
+	gl.glOrtho(-renderer.unitsWide/2,renderer.unitsWide/2,-unitsTall/2,unitsTall/2,-1,1);
+	gl.glMatrixMode(GL2.GL_MODELVIEW);
+	
 	int a = 0;
-	for(int i = -3; i < 3; i++)
+	for(int i = -100; i < 100; i++)
 	{
-	    for(int j = -3; j < 3; j++)
+	    for(int j = -100; j < 100; j++)
 	    {
-		if(j%2 == 1)
+		if(j%2 == 0)
 		{
+		    graphics.setColor(1,0,0);
 		    a = 1;
 		}else
 		{
+		    graphics.setColor(0,1,0);
 		    a = 0;
 		}
-		graphics.fillHex(2*i+a,2*j,1);
+		graphics.fillHex(2*i+a,(float) (1.9*j),1);
 	    }
 	}
     }

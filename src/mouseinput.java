@@ -39,8 +39,15 @@ public class mouseinput implements MouseListener{
     }
 
     @Override
-    public void mouseWheelMoved(MouseEvent arg0) {
-	
+    public void mouseWheelMoved(MouseEvent e) {
+	float r = renderer.unitsWide;
+	if(e.getRotation()[1] > 0)
+	{
+	    renderer.unitsWide = Math.min(50,r + 5);
+	}else
+	{
+	    renderer.unitsWide = Math.max(10,r - 5);
+	}
     }
 
 }

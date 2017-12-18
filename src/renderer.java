@@ -1,13 +1,9 @@
-import javax.swing.JFrame;
-
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.util.FPSAnimator;
-
-import jogamp.opengl.macosx.cgl.MacOSXCGLDrawable.GLBackendType;
 
 public class renderer {
 
@@ -17,7 +13,7 @@ public class renderer {
     public static int screenW = 640;
     public static int screenH = 360;
     
-    public static float unitsWide = 10;
+    public static float unitsWide = 50;
     
     public static void init(){
 	GLProfile.initSingleton();
@@ -31,6 +27,13 @@ public class renderer {
 	window.addGLEventListener(new eventlistener());
 	window.addMouseListener(new mouseinput());
 	window.requestFocus();
+	
+	window.addWindowListener(new WindowAdapter() {
+		@Override
+		public void windowDestroyed(WindowEvent e) {
+			System.exit(0);
+		}
+	});
 	
 	FPSAnimator animator = new FPSAnimator(window,60);
 	animator.start();

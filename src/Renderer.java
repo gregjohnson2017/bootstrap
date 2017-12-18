@@ -5,7 +5,7 @@ import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.util.FPSAnimator;
 
-public class renderer {
+public class Renderer {
 
     
     private static GLWindow window = null;
@@ -15,8 +15,8 @@ public class renderer {
     
     public static float unitsWide = 50;
     
-    public static float centerOffX = 180;
-    public static float centerOffY = 180;
+    public static float centerOffX = 0;
+    public static float centerOffY = 0;
     
     public static void init(){
 	GLProfile.initSingleton();
@@ -27,14 +27,19 @@ public class renderer {
 	window.setSize(screenW,screenH);
 	window.setTitle("Bootstrap");
 	//window.setResizable(false);
-	window.addGLEventListener(new eventlistener());
-	window.addMouseListener(new mouseinput());
+	window.addGLEventListener(new Eventlistener());
+	window.addMouseListener(new Mouseinput());
 	window.requestFocus();
 	
 	window.addWindowListener(new WindowAdapter() {
 		@Override
 		public void windowDestroyed(WindowEvent e) {
 			System.exit(0);
+		}
+		
+		@Override
+		public void windowResized(WindowEvent e) {
+		    Mouseinput.getBounds();
 		}
 	});
 	

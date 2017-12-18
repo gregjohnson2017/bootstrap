@@ -1,6 +1,6 @@
 import com.jogamp.opengl.GL2;
 
-public class graphics {
+public class Graphics {
 
     public static GL2 gl = null;
     private static float red = 0;
@@ -8,7 +8,7 @@ public class graphics {
     private static float green = 0;
     
     public static void fillHex(float x, float y, float r) {
-	gl = eventlistener.gl;
+	gl = Eventlistener.gl;
 	    
 	gl.glColor3f(red,green,blue);
 	gl.glBegin(GL2.GL_POLYGON);

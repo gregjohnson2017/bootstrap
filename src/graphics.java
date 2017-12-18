@@ -4,10 +4,10 @@ public class graphics {
 
     public static GL2 gl = null;
     private static float red = 0;
-    private static float green = 0;
     private static float blue = 0;
+    private static float green = 0;
     
-    public static void fillHex(float x, float y, float r){
+    public static void fillHex(float x, float y, float r) {
 	gl = eventlistener.gl;
 	    
 	gl.glColor3f(red,green,blue);
@@ -19,10 +19,9 @@ public class graphics {
 	gl.glEnd();
     }
     
-    public static void setColor(float r, float g, float b)
-    {
+    public static void setColor(float r, float b, float g) {
 	red = r;
-	green = g;
 	blue = b;
+	green = g;
     }
 }

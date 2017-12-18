@@ -15,6 +15,9 @@ public class renderer {
     
     public static float unitsWide = 50;
     
+    public static float centerOffX = 180;
+    public static float centerOffY = 180;
+    
     public static void init(){
 	GLProfile.initSingleton();
 	GLProfile profile = GLProfile.get(GLProfile.GL2);

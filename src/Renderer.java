@@ -11,7 +11,7 @@ public class Renderer {
 
     public static int screenW = 640;
     public static int screenH = 360;
-    
+
     public static final int FPS = 60;
 
     // this is controlled to make the camera "zoom" in and out
@@ -29,45 +29,45 @@ public class Renderer {
     public static float maxOffY = 200;
 
     public static void init() {
-	GLProfile.initSingleton();
-	GLProfile profile = GLProfile.get(GLProfile.GL2);
-	GLCapabilities caps = new GLCapabilities(profile);
+        GLProfile.initSingleton();
+        GLProfile profile = GLProfile.get(GLProfile.GL2);
+        GLCapabilities caps = new GLCapabilities(profile);
 
-	window = GLWindow.create(caps);
-	window.setSize(screenW, screenH);
-	window.setTitle("Bootstrap");
-	// window.setResizable(false);
-	window.addGLEventListener(new Eventlistener());
-	window.addMouseListener(new Mouseinput());
-	window.requestFocus();
+        window = GLWindow.create(caps);
+        window.setSize(screenW, screenH);
+        window.setTitle("Bootstrap");
+        // window.setResizable(false);
+        window.addGLEventListener(new Eventlistener());
+        window.addMouseListener(new Mouseinput());
+        window.requestFocus();
 
-	window.addWindowListener(new WindowAdapter() {
-	    @Override
-	    public void windowDestroyed(WindowEvent e) {
-		System.exit(0);
-	    }
+        window.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowDestroyed(WindowEvent e) {
+                System.exit(0);
+            }
 
-	    @Override
-	    public void windowResized(WindowEvent e) {
-		Mouseinput.getBounds();
-	    }
-	});
+            @Override
+            public void windowResized(WindowEvent e) {
+                Mouseinput.getBounds();
+            }
+        });
 
-	FPSAnimator animator = new FPSAnimator(window, FPS);
-	animator.start();
+        FPSAnimator animator = new FPSAnimator(window, FPS);
+        animator.start();
 
-	window.setVisible(true);
+        window.setVisible(true);
     }
 
     public static int getWindowWidth() {
-	return window.getWidth();
+        return window.getWidth();
     }
 
     public static int getWindowHeight() {
-	return window.getHeight();
+        return window.getHeight();
     }
 
     public static float getUnitsTall(float unitsWide) {
-	return getWindowHeight() / (getWindowWidth() / unitsWide);
+        return getWindowHeight() / (getWindowWidth() / unitsWide);
     }
 }

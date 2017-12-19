@@ -4,12 +4,13 @@ public class Graphics {
 
     public static GL2 gl = null;
     private static float red = 0;
-    private static float blue = 0;
     private static float green = 0;
+    private static float blue = 0;
     
     public static void fillHex(float x, float y, float r) {
 	gl = Eventlistener.gl;
 	    
+	
 	gl.glColor3f(red,green,blue);
 	gl.glBegin(GL2.GL_POLYGON);
 	for(int i = 0; i < 6; ++i) {

@@ -31,7 +31,7 @@ public class Mouseinput implements MouseListener {
             float a = 0;
             // must flip the Y (around -1...it works...)
             // this is just because the way the hexagons are drawn vs "indexed"
-            int clickHexY = -1 - Math.round((clickUnitYfromCenter - 1.9f) / 1.9f);
+            int clickHexY = -1 - Math.round((clickUnitYfromCenter - 1.85f) / 1.85f);
             if (clickHexY % 2 != 0) {
                 // must shift
                 a = 1f;
@@ -128,7 +128,7 @@ public class Mouseinput implements MouseListener {
         // plus slight fudge to see edges
 
         Renderer.maxOffX = Math.max(0, (float) (Game.maxGridX - unitsWide / 2) + 2);
-        Renderer.maxOffY = (float) Math.max(0, (float) (Game.maxGridY - unitsTall / 1.9) + 2);
+        Renderer.maxOffY = (float) Math.max(0, (float) (Game.maxGridY - unitsTall / 1.85f) + 2);
     }
 
 }

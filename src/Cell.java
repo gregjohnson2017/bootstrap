@@ -15,13 +15,13 @@ public class Cell {
         // a hexagonal cell in the game
     }
 
-    public void setRBG(float red, float green, float blue) {
+    public void setRGB(float red, float green, float blue) {
         this.red = red;
         this.green = green;
         this.blue = blue;
     }
 
-    public float[] getRBG() {
+    public float[] getRGB() {
         // gets color, including "selected color"
         float[] RGB = new float[3];
         if (selected) {

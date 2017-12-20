@@ -21,7 +21,7 @@ public class Game {
         // creates test grid (dev purposes)
         JOptionPane.showMessageDialog(null, "Boostrap \n" + "by Alex Johnson");
 
-        SpinnerNumberModel sModel = new SpinnerNumberModel(10, 0, 100, 1);
+        SpinnerNumberModel sModel = new SpinnerNumberModel(20, 0, 30, 1);
         JSpinner spinner = new JSpinner(sModel);
         JOptionPane.showMessageDialog(null, spinner, "Enter Grid Size X", JOptionPane.INFORMATION_MESSAGE, null);
         maxGridX = (int) spinner.getValue();
@@ -41,9 +41,9 @@ public class Game {
                 c.col = j - (maxGridY / 2);
                 // christmas colors lol
                 if (j % 2 == 0) {
-                    c.setRBG(1, 0, 0);
+                    c.setRGB(1, 0, 0);
                 } else {
-                    c.setRBG(0, 0, 1);
+                    c.setRGB(0, 1, 0);
                 }
                 cells.add(c);
             }

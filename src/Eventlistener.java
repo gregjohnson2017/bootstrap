@@ -6,9 +6,13 @@ import com.jogamp.opengl.GLEventListener;
 public class Eventlistener implements GLEventListener {
 
     public static GL2 gl = null;
+    private float rot = 0;
+    private float rad = 0;
+
 
     @Override
     public void display(GLAutoDrawable drawable) {
+
         gl = drawable.getGL().getGL2();
 
         gl.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
@@ -23,12 +27,13 @@ public class Eventlistener implements GLEventListener {
                 -unitsTall / 2 + Renderer.centerOffY, unitsTall / 2 + Renderer.centerOffY, -1, 1);
         gl.glMatrixMode(GL2.GL_MODELVIEW);
 
+
         int a = 0;
 
         // will draw hexagons as far as you can zoom
 
-        for (int i = (int) (-2 * Renderer.maxUnitsWide); i < (int) (2 * Renderer.maxUnitsWide); i++) {
-            for (int j = (int) (-2 * Renderer.getUnitsTall(Renderer.maxUnitsWide)); j < (int) (2
+        for (int i = (int) (-1 * Renderer.maxUnitsWide); i < (int) (1 * Renderer.maxUnitsWide); i++) {
+            for (int j = (int) (-1 * Renderer.getUnitsTall(Renderer.maxUnitsWide)); j < (int) (1
                     * Renderer.getUnitsTall(Renderer.maxUnitsWide)); j++) {
                 // parity for grid offset
                 if (j % 2 == 0) {
@@ -37,16 +42,37 @@ public class Eventlistener implements GLEventListener {
                     a = 0;
                 }
                 // adds colored cell if it can, otherwise sets it to black
+                float[] RGB = new float[3];
                 if (Game.hasCell(i, j)) {
-                    Cell c = Game.getCell(i, j);
-                    float[] RGB = c.getRBG();
-                    Graphics.setColor(RGB[0], RGB[1], RGB[2]);
+                    RGB = Game.getCell(i, j).getRGB();
                 } else {
-                    Graphics.setColor(0, 0, 0);
+                    RGB[0] = 0;
+                    RGB[1] = 0;
+                    RGB[2] = 0;
                 }
-                Graphics.fillHex(2 * i + a, (float) (1.9 * j), 1);
+
+//                if(i == 0 && j == 0) {
+//                    System.out.println((double)(2f * i + a) + ", " + (double)(1.85f * j));
+//                }
+
+                Graphics.fillHex(2f * i + a, 1.85f * j, rad, rot, RGB);
             }
         }
+
+
+        // for rotating (startup)
+
+        // later add a boolean to only do this at level load (also at end)
+
+        if (rad <= 0.98f) {
+            rot += (float) 36 / 5;
+            rad += 0.02f;
+        } else {
+            rot = 0f;
+            rad = 1f;
+        }
+
+//      System.out.println(Renderer.centerOffX + ", " + Renderer.centerOffY);
     }
 
     @Override

@@ -6,8 +6,8 @@ import com.jogamp.opengl.GLEventListener;
 public class Eventlistener implements GLEventListener {
 
     public static GL2 gl = null;
-    private float rot = 0;
-    private float rad = 0;
+    private double rot = 0;
+    private double rad = 0;
 
 
     @Override
@@ -55,7 +55,7 @@ public class Eventlistener implements GLEventListener {
 //                    System.out.println((double)(2f * i + a) + ", " + (double)(1.85f * j));
 //                }
 
-                Graphics.fillHex(2f * i + a, 1.85f * j, rad, rot, RGB);
+                Graphics.fillHex(2 * i + a, 1.85 * j, rad, rot, RGB);
             }
         }
 
@@ -64,12 +64,12 @@ public class Eventlistener implements GLEventListener {
 
         // later add a boolean to only do this at level load (also at end)
 
-        if (rad <= 0.98f) {
-            rot += (float) 36 / 5;
-            rad += 0.02f;
+        if (rad <= 0.98) {
+            rot += (double) 36 / 5;
+            rad += 0.02;
         } else {
-            rot = 0f;
-            rad = 1f;
+            rot = 0;
+            rad = 1;
         }
 
 //      System.out.println(Renderer.centerOffX + ", " + Renderer.centerOffY);

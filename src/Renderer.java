@@ -39,6 +39,7 @@ public class Renderer {
         // window.setResizable(false);
         window.addGLEventListener(new Eventlistener());
         window.addMouseListener(new Mouseinput());
+        window.addKeyListener(new Keyinput());
         window.requestFocus();
 
         window.addWindowListener(new WindowAdapter() {

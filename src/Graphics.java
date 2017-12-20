@@ -5,10 +5,10 @@ public class Graphics {
 
     private static double[] sch = new double[12]; // sch = sin cos hex coords (only need to compute once)
 
-    public static void fillHex(double x, double y, double rad, double rot, float[] RGB) {
+    public static void fillHex(double x, double y, double rad, double rot, float[] RGBA) {
         gl = Eventlistener.gl;
 
-        gl.glColor3f(RGB[0], RGB[1], RGB[2]);
+        gl.glColor4f(RGBA[0], RGBA[1], RGBA[2], RGBA[3]);
 
         gl.glTranslated(x,y,0);
         gl.glRotated(rot, 0,0,1);

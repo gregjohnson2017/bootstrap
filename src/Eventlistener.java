@@ -2,6 +2,9 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.util.awt.TextRenderer;
+
+import java.awt.Font;
 
 public class Eventlistener implements GLEventListener {
 
@@ -14,6 +17,8 @@ public class Eventlistener implements GLEventListener {
     public void display(GLAutoDrawable drawable) {
 
         gl = drawable.getGL().getGL2();
+        gl.glEnable(GL.GL_BLEND);
+        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 
         gl.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
@@ -23,6 +28,7 @@ public class Eventlistener implements GLEventListener {
 
         float unitsTall = Renderer.getWindowHeight() / (Renderer.getWindowWidth() / Renderer.unitsWide);
 
+        //shifts slightly to account for hexagon sizing
         gl.glOrtho(-Renderer.unitsWide / 2 + Renderer.centerOffX, Renderer.unitsWide / 2 + Renderer.centerOffX,
                 -unitsTall / 2 + Renderer.centerOffY, unitsTall / 2 + Renderer.centerOffY, -1, 1);
         gl.glMatrixMode(GL2.GL_MODELVIEW);
@@ -30,11 +36,11 @@ public class Eventlistener implements GLEventListener {
 
         int a = 0;
 
-        // will draw hexagons as far as you can zoom
+        // will draw hexagons as far as you can zoom, (taking maximum dimension)
+        int totalSize = (int) Math.max(Renderer.maxUnitsWide, Renderer.getUnitsTall(Renderer.maxUnitsWide));
 
-        for (int i = (int) (-1 * Renderer.maxUnitsWide); i < (int) (1 * Renderer.maxUnitsWide); i++) {
-            for (int j = (int) (-1 * Renderer.getUnitsTall(Renderer.maxUnitsWide)); j < (int) (1
-                    * Renderer.getUnitsTall(Renderer.maxUnitsWide)); j++) {
+        for (int i = -totalSize; i < totalSize; i++) {
+            for (int j = -totalSize; j < totalSize; j++) {
                 // parity for grid offset
                 if (j % 2 == 0) {
                     a = 1;
@@ -42,20 +48,17 @@ public class Eventlistener implements GLEventListener {
                     a = 0;
                 }
                 // adds colored cell if it can, otherwise sets it to black
-                float[] RGB = new float[3];
+                float[] RGBA = new float[4];
                 if (Game.hasCell(i, j)) {
-                    RGB = Game.getCell(i, j).getRGB();
+                    RGBA = Game.getCell(i, j).getRGBA();
                 } else {
-                    RGB[0] = 0;
-                    RGB[1] = 0;
-                    RGB[2] = 0;
+                    RGBA[0] = 0;
+                    RGBA[1] = 0;
+                    RGBA[2] = 0;
+                    RGBA[3] = 1;
                 }
 
-//                if(i == 0 && j == 0) {
-//                    System.out.println((double)(2f * i + a) + ", " + (double)(1.85f * j));
-//                }
-
-                Graphics.fillHex(2 * i + a, 1.85 * j, rad, rot, RGB);
+                Graphics.fillHex(2 * i + a, 1.8 * j, rad, rot, RGBA);
             }
         }
 
@@ -72,7 +75,16 @@ public class Eventlistener implements GLEventListener {
             rad = 1;
         }
 
-//      System.out.println(Renderer.centerOffX + ", " + Renderer.centerOffY);
+        // now renders the bottom text
+        TextRenderer rend = new TextRenderer(new Font("Ariel", Font.BOLD, 18));
+        rend.beginRendering(Renderer.getWindowWidth(),Renderer.getWindowHeight());
+        rend.setColor(1, 1, 1, 0.8f);
+        rend.draw(Game.getBotText(), 5, 7);
+        rend.endRendering();
+
+
+
+
     }
 
     @Override

@@ -9,7 +9,7 @@ public class Mouseinput implements MouseListener {
     @Override
     public void mouseClicked(MouseEvent e) {
 
-        // left click to select cells :P
+        // left click to select cells
         if (e.getButton() == 1) {
             // selects given cell, if possible
             // first finds what unit we are in
@@ -31,7 +31,7 @@ public class Mouseinput implements MouseListener {
             float a = 0;
             // must flip the Y (around -1...it works...)
             // this is just because the way the hexagons are drawn vs "indexed"
-            int clickHexY = -1 - Math.round((clickUnitYfromCenter - 1.85f) / 1.85f);
+            int clickHexY = -1 - Math.round((clickUnitYfromCenter - 1.8f) / 1.8f);
             if (clickHexY % 2 != 0) {
                 // must shift
                 a = 1f;
@@ -39,10 +39,24 @@ public class Mouseinput implements MouseListener {
             int clickHexX = Math.round((clickUnitXfromCenter - 1f + a) / 2);
 
             // checks to see if in bounds
-            if (-Game.maxGridX / 2 <= clickHexX && clickHexX < (float) Game.maxGridX / 2
-                    && -Game.maxGridY / 2 <= clickHexY && clickHexY < (float) Game.maxGridY / 2) {
+            if (-Game.gridX / 2 <= clickHexX && clickHexX < (float) Game.gridX / 2
+                    && -Game.gridY / 2 <= clickHexY && clickHexY < (float) Game.gridY / 2) {
                 // selects this cell
                 Game.selectCell(clickHexX, clickHexY);
+
+                // depending on gamemode, does more action
+                switch (Game.gameMode) {
+                    case 0:
+                        break;
+                    case 1:
+                        // will set a new cell type
+                        Game.setCell(Game.getCell(clickHexX, clickHexY), Game.makeCell);
+                        break;
+                    default:
+                        break;
+                }
+
+
             } else {
                 // deselects
                 Game.deselect();
@@ -127,8 +141,8 @@ public class Mouseinput implements MouseListener {
         // scale by 2 for size of hexagon in X, 1.9 for size of hexagon in Y
         // plus slight fudge to see edges
 
-        Renderer.maxOffX = Math.max(0, (float) (Game.maxGridX - unitsWide / 2) + 2);
-        Renderer.maxOffY = (float) Math.max(0, (float) (Game.maxGridY - unitsTall / 1.85f) + 2);
+        Renderer.maxOffX = Math.max(0, (float) (Game.gridX - unitsWide / 2) + 2);
+        Renderer.maxOffY = (float) Math.max(0, (float) (Game.gridY - unitsTall / 1.8f) + 2);
     }
 
 }

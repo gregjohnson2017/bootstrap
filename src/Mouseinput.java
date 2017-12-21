@@ -39,8 +39,8 @@ public class Mouseinput implements MouseListener {
             int clickHexX = Math.round((clickUnitXfromCenter - 1f + a) / 2);
 
             // checks to see if in bounds
-            if (-Game.gridX / 2 <= clickHexX && clickHexX < (float) Game.gridX / 2
-                    && -Game.gridY / 2 <= clickHexY && clickHexY < (float) Game.gridY / 2) {
+            if (-Game.gridRows / 2 <= clickHexX && clickHexX < (float) Game.gridRows / 2
+                    && -Game.gridCols / 2 <= clickHexY && clickHexY < (float) Game.gridCols / 2) {
                 // selects this cell
                 Game.selectCell(clickHexX, clickHexY);
 
@@ -50,7 +50,13 @@ public class Mouseinput implements MouseListener {
                         break;
                     case 1:
                         // will set a new cell type
-                        Game.setCell(Game.getCell(clickHexX, clickHexY), Game.makeCell);
+                        // if this is setting a unique cell, sets old to empty space
+                        int t = Game.makeCellType;
+                        if (Cell.isUnique(t)) {
+                            // sets to empty space the (hopefully unique) last cell of this type
+                            Game.clearCellOfType(t);
+                        }
+                        Game.setCell(Game.getCell(clickHexX, clickHexY), t);
                         break;
                     default:
                         break;
@@ -122,6 +128,7 @@ public class Mouseinput implements MouseListener {
 
     @Override
     public void mouseWheelMoved(MouseEvent e) {
+
         float r = Renderer.unitsWide;
         if (e.getRotation()[1] > 0) {
             Renderer.unitsWide = Math.min(Renderer.maxUnitsWide, r + 5);
@@ -130,6 +137,8 @@ public class Mouseinput implements MouseListener {
         }
         // updates bounds too
         getBounds();
+
+
     }
 
     public static void getBounds() {
@@ -141,8 +150,8 @@ public class Mouseinput implements MouseListener {
         // scale by 2 for size of hexagon in X, 1.9 for size of hexagon in Y
         // plus slight fudge to see edges
 
-        Renderer.maxOffX = Math.max(0, (float) (Game.gridX - unitsWide / 2) + 2);
-        Renderer.maxOffY = (float) Math.max(0, (float) (Game.gridY - unitsTall / 1.8f) + 2);
+        Renderer.maxOffX = Math.max(0, (float) (Game.gridRows - unitsWide / 2) + 2);
+        Renderer.maxOffY = (float) Math.max(0, (float) (Game.gridCols - unitsTall / 1.8f) + 2);
     }
 
 }

@@ -17,8 +17,8 @@ public class Renderer {
     // this is controlled to make the camera "zoom" in and out
     public static float unitsWide = 50;
 
-    public static float maxUnitsWide = 100;
-    public static float minUnitsWide = 10;
+    public static float maxUnitsWide = 100; //this is overwritten in level creation...
+    public static float minUnitsWide = 5;
 
     // offset in units from "actual (unit) center", measured from center of
     // screen (hence zoom invariant)
@@ -35,7 +35,7 @@ public class Renderer {
 
         window = GLWindow.create(caps);
         window.setSize(screenW, screenH);
-        window.setTitle("Bootstrap");
+        setWindowTitle();
         // window.setResizable(false);
         window.addGLEventListener(new Eventlistener());
         window.addMouseListener(new Mouseinput());
@@ -60,6 +60,25 @@ public class Renderer {
         Graphics.computeStuff();
 
         window.setVisible(true);
+    }
+
+    public static void setWindowTitle() {
+        String s = "";
+        if(Game.gameMode == 1)
+        {
+            s = " (Editing)";
+        }
+        window.setTitle("Bootstrap: " + Game.levelName + s);
+    }
+
+    public static void setUnitsWide(int newUnitsWide) {
+        // sets units wide, also max
+        unitsWide = newUnitsWide;
+        maxUnitsWide = unitsWide * 2;
+    }
+
+    public static double getPixelsPerUnit() {
+        return (window.getWidth()/unitsWide);
     }
 
     public static int getWindowWidth() {

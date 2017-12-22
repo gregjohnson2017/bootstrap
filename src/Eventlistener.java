@@ -20,6 +20,9 @@ public class Eventlistener implements GLEventListener {
     public static boolean outroAnimation = false;
     public static boolean outroAnimationBegun = false;
 
+    // after display finishes outro animation, should finish the loading process in Game method
+    public static boolean finishLoad = false;
+
 
     @Override
     public void display(GLAutoDrawable drawable) {
@@ -73,11 +76,15 @@ public class Eventlistener implements GLEventListener {
                     // adds colored cell if it can, otherwise sets it to black
                     float[] RGBA = new float[4];
                     String s = null;
+                    String k = null;
                     if (Game.hasCell(i, j)) {
                         Cell c = Game.getCell(i, j);
                         RGBA = c.getRGBA();
                         if (c.labelled) {
                             s = c.label;
+                        }
+                        if(c.hasKey) {
+                            k = c.key;
                         }
                     } else {
                         RGBA[0] = 0;
@@ -85,7 +92,7 @@ public class Eventlistener implements GLEventListener {
                         RGBA[2] = 0;
                         RGBA[3] = 1;
                     }
-                    Graphics.fillHex(2 * i + a, 1.8 * j, rad, rot, RGBA, s);
+                    Graphics.fillHex(2 * i + a, 1.75 * j, rad, rot, RGBA, s,k);
                 }
             }
 
@@ -95,7 +102,7 @@ public class Eventlistener implements GLEventListener {
                 rot += (double) 360 / 50; //360 degrees divided by 50 radius increases of size 0.02 up to 1
                 rad += 0.02;
             } else if (rad > 0 && outroAnimation) {
-                rot -= (double) 360/50;
+                rot -= (double) 360 / 50;
                 rad -= 0.02;
             } else {
                 rot = 0;
@@ -104,17 +111,22 @@ public class Eventlistener implements GLEventListener {
                 introAnimation = false;
                 introAnimationBegun = false;
 
-                if(outroAnimationBegun && outroAnimation) {
+                if (finishLoad) {
                     // this means it just completed its outro animation
                     // now can finish loading new level
+                    // THIS MOST LIKELY HAS BUGS OR AT LEAST INCOMPATIBLE WITH FUTURE FEATURES!!!
+                    // the only reason this goes here is because I want the new level to be rendered only after
+                    // the animation here has finished, and only eventlistener has the thread to know when this is done
                     Game.cells.clear();
                     Game.cells.addAll(Game.newCells);
                     Game.newCells.clear();
                     //sets up renderer again
                     Renderer.setUnitsWide(Math.max(2 * Game.gridRows, 2 * Game.gridCols));
+                    Renderer.setWindowTitle();
                     //does intro animation
                     introAnimation = true;
                     introAnimationBegun = false;
+                    finishLoad = false;
                 }
 
                 outroAnimation = false;

@@ -8,7 +8,7 @@ public class Keyinput implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-         System.out.println("KEYCODE: " + e.getKeyCode());
+        System.out.println("KEYCODE: " + e.getKeyCode());
         // depends on game mode for what keys do
         switch (e.getKeyCode()) {
             case 27:
@@ -93,7 +93,7 @@ public class Keyinput implements KeyListener {
                 break;
             case 66:
                 //B key
-                switch(Game.gameMode) {
+                switch (Game.gameMode) {
                     case 0:
                         break;
                     case 1:
@@ -106,7 +106,7 @@ public class Keyinput implements KeyListener {
                 break;
             case 80:
                 //P key
-                switch(Game.gameMode) {
+                switch (Game.gameMode) {
                     case 0:
                         break;
                     case 1:
@@ -116,6 +116,85 @@ public class Keyinput implements KeyListener {
                     default:
                         break;
                 }
+                break;
+            case 79:
+                //O key
+                switch (Game.gameMode) {
+                    case 0:
+                        break;
+                    case 1:
+                        // open door
+                        Game.makeCellType = 4;
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 67:
+                //C key
+                switch (Game.gameMode) {
+                    case 0:
+                        break;
+                    case 1:
+                        // closed door
+                        Game.makeCellType = 5;
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 76:
+                //L key
+                switch (Game.gameMode) {
+                    case 0:
+                        break;
+                    case 1:
+                        // closed door
+                        Game.makeCellType = 6;
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 75:
+                //K key
+                switch (Game.gameMode) {
+                    case 0:
+                        break;
+                    case 1:
+                        // gives key (must be empty cell or player for this to do anything)
+                        Game.makeCellType = 7;
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 84:
+                //T key
+                switch (Game.gameMode) {
+                    case 0:
+                        break;
+                    case 1:
+                        // time machine!
+                        Game.makeCellType = 8;
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 88:
+                //X key
+                switch (Game.gameMode) {
+                    case 0:
+                        break;
+                    case 1:
+                        // exit
+                        Game.makeCellType = 9;
+                        break;
+                    default:
+                        break;
+                }
+                break;
             default:
                 //other key
                 break;

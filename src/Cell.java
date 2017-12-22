@@ -18,10 +18,19 @@ public class Cell {
     // some cells are labelled (e.g. doors link to buttons, players)
     public String label = "";
     public boolean labelled = false;
+    public boolean customLabel = false; // prevent player from labelling (if can label at all)
 
     // unique cells cannot appear twice in a grid
     // for players, this is true but only per label (for editor usage)
     public boolean unique = false;
+
+    public boolean passable = false; // player can move through entity
+
+    public boolean useable = false; // player can use
+
+    public String key = "";
+    public boolean hasKey = false;
+    public boolean canHaveKey = false;
 
     /**
      * 0 = empty space
@@ -41,21 +50,32 @@ public class Cell {
         int i3 = rest2.indexOf('|');
         cellType = Integer.parseInt(rest2.substring(0, i3));
         String rest3 = rest2.substring(i3 + 1);
-        label = rest3.substring(0, rest3.length() - 1);
-        autoProp();
+        int i4 = rest3.indexOf('|');
+        label = rest3.substring(0, i4);
+        String rest4 = rest3.substring(i4 + 1);
+        key = rest4.substring(0, rest4.length() - 1);
+        if (!key.equals("")) {
+            // actually has a key
+            hasKey = true;
+        }
+        autoProp(false);
     }
 
     public String writePropString() {
         // writes all properties to string (for saving)
         // only writes properties that cannot be inferred (e.g. does not include RGBA)
-        String propString = "[" + row + "|" + col + "|" + cellType + "|" + label + "]";
+        String propString = "[" + row + "|" + col + "|" + cellType + "|" + label + "|" + key + "]";
         return propString;
     }
 
     /**
      * Automatically sets cell colors and properties due to cell type
      */
-    public void autoProp() {
+    public void autoProp(boolean removeKeys) {
+        if(removeKeys) {
+            hasKey = false;
+            key = "";
+        }
         switch (cellType) {
             case 0:
                 // empty space
@@ -63,6 +83,9 @@ public class Cell {
                 green = 0.9f;
                 blue = 0.9f;
                 labelled = false;
+                customLabel = false;
+                passable = true;
+                canHaveKey = true;
                 break;
             case 1:
                 // wall
@@ -70,6 +93,9 @@ public class Cell {
                 green = 0.05f;
                 blue = 0.05f;
                 labelled = false;
+                customLabel = false;
+                passable = false;
+                canHaveKey = false;
                 break;
             case 2:
                 // button
@@ -77,6 +103,9 @@ public class Cell {
                 green = 0;
                 blue = 0;
                 labelled = true;
+                customLabel = true;
+                passable = true;
+                canHaveKey = false;
                 break;
             case 3:
                 // player
@@ -84,6 +113,61 @@ public class Cell {
                 green = 1;
                 blue = 0;
                 labelled = true;
+                customLabel = false;
+                passable = false;
+                canHaveKey = true;
+                break;
+            case 4:
+                // open door
+                red = 0.5f;
+                green = 0.4f;
+                blue = 0.8f;
+                labelled = true;
+                customLabel = true;
+                passable = true;
+                canHaveKey = false;
+                break;
+            case 5:
+                // closed door
+                red = 0.2f;
+                green = 0.2f;
+                blue = 0.3f;
+                labelled = true;
+                customLabel = true;
+                passable = false;
+                canHaveKey = false;
+                break;
+            case 6:
+                // locked (closed) door
+                red = 0.4f;
+                green = 0.4f;
+                blue = 0.2f;
+                labelled = true;
+                customLabel = true;
+                passable = false;
+                canHaveKey = false;
+                break;
+            //no case 7, this is "key", which is not a cell type
+            case 8:
+                // time machine
+                red = 0;
+                green = 0.2f;
+                blue = 0.8f;
+                labelled = true;
+                customLabel = true;
+                passable = false;
+                canHaveKey = false;
+                break;
+            case 9:
+                // exit
+                red = 0.7f;
+                green = 0.8f;
+                blue = 0.2f;
+                labelled = true; // not in the usual way, so will not ask player
+                customLabel = false;
+                label = "EXIT";
+                passable = true;
+                canHaveKey = false;
                 break;
             default:
                 System.out.println("Unknown cell type! autoProp failed.");
@@ -99,24 +183,19 @@ public class Cell {
 
     public static boolean isUnique(int cellType) {
         switch (cellType) {
-            case 0:
-                return false; //empty space
-            case 1:
-                return false; //wall
-            case 2:
-                return false; //button
             case 3:
                 return true; //player
-            default:
-                break;
+            case 9:
+                return true; //exit
         }
         return false;
     }
 
     public void setType(int cellType) {
         // sets type and formats cell
+        // will clear key if this is called (setCell in Game will not call if giving key)
         this.cellType = cellType;
-        autoProp();
+        autoProp(true);
     }
 
     public int getType() {
@@ -156,6 +235,18 @@ public class Cell {
                 return "Button";
             case 3:
                 return "Player";
+            case 4:
+                return "Open Door";
+            case 5:
+                return "Closed Door";
+            case 6:
+                return "Locked Door";
+            case 7:
+                return "Key"; //not a cell type... set this for editor
+            case 8:
+                return "Time Machine";
+            case 9:
+                return "Exit";
             default:
                 return "INVALID CELL TYPE";
         }

@@ -31,7 +31,7 @@ public class Mouseinput implements MouseListener {
             float a = 0;
             // must flip the Y (around -1...it works...)
             // this is just because the way the hexagons are drawn vs "indexed"
-            int clickHexY = -1 - Math.round((clickUnitYfromCenter - 1.8f) / 1.8f);
+            int clickHexY = -1 - Math.round((clickUnitYfromCenter - 1.75f) / 1.75f);
             if (clickHexY % 2 != 0) {
                 // must shift
                 a = 1f;
@@ -56,7 +56,11 @@ public class Mouseinput implements MouseListener {
                             // sets to empty space the (hopefully unique) last cell of this type
                             Game.clearCellOfType(t);
                         }
-                        Game.setCell(Game.getCell(clickHexX, clickHexY), t);
+                        // if trying to give a key (t = 7) make sure this is possible (only way this can fail)
+                        Cell c = Game.getCell(clickHexX, clickHexY);
+                        if(t != 7 || c.canHaveKey) {
+                            Game.setCell(c, t);
+                        }
                         break;
                     default:
                         break;
@@ -151,7 +155,7 @@ public class Mouseinput implements MouseListener {
         // plus slight fudge to see edges
 
         Renderer.maxOffX = Math.max(0, (float) (Game.gridRows - unitsWide / 2) + 2);
-        Renderer.maxOffY = (float) Math.max(0, (float) (Game.gridCols - unitsTall / 1.8f) + 2);
+        Renderer.maxOffY = (float) Math.max(0, (float) (Game.gridCols - unitsTall / 1.75f) + 2);
     }
 
 }

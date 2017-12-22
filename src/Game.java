@@ -163,13 +163,14 @@ public class Game {
         }
         Eventlistener.pauseRendering = false;
 
-        if(success) {
+        if (success) {
             if (firstLoad) {
                 // only do intro animation
                 //sets up renderer again
                 Renderer.setUnitsWide(Math.max(2 * Game.gridRows, 2 * Game.gridCols));
             } else {
                 // have event listener handle outro and rest of load
+                Eventlistener.finishLoad = true;
                 Eventlistener.outroAnimationBegun = false;
                 Eventlistener.outroAnimation = true;
                 // since eventlistener knows how long this takes, it handles the rest of the load (kinda ugly... whatever)
@@ -261,24 +262,41 @@ public class Game {
 
     public static void setCell(Cell c, int type) {
         // sets this cell to this type
-        c.setType(type);
-        // if it needs a label AND in the editor AND is not labelling player, asks user
-        if (c.labelled && gameMode == 1 && type != 3) {
+        // except for keys! these are handled differently.
+        if(type != 7) {
+            c.setType(type);
+        }
+        // must be in level editor, and either be labelling something OR be giving a key and be allowed to do so
+        if (gameMode == 1 && ((c.customLabel && type != 7) || (type == 7 && c.canHaveKey))) {
             // forbids user from using brackets in label!!!
             boolean goodLabel = false;
-            String proposedLabel = "";
+            String proposedLabel = null;
             while (!goodLabel) {
                 proposedLabel = JOptionPane.showInputDialog("Enter label for " + c.getCellName(type),
                         "0");
-                if (proposedLabel.contains("[") || proposedLabel.contains("]")) {
+                //can have empty label, but NOT empty key
+                goodLabel = true;
+                if(proposedLabel == null || proposedLabel.equals("")) {
+                    if( type != 7) {
+                        proposedLabel = ""; // sets to empty
+                        goodLabel = true;
+                    } else {
+                        //cannot have empty key!
+                        goodLabel = false;
+                    }
+                } else if (proposedLabel.contains("[") || proposedLabel.contains("]")) {
                     JOptionPane.showMessageDialog(null, "Label cannot contain '[' or '']!",
                             "Naming Level",
                             JOptionPane.WARNING_MESSAGE);
-                } else {
-                    goodLabel = true;
+                    goodLabel = false;
                 }
             }
-            c.label = proposedLabel;
+            if(type != 7) {
+                c.label = proposedLabel;
+            } else {
+                c.hasKey = true;
+                c.key = proposedLabel;
+            }
         }
 
     }

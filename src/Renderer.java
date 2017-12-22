@@ -64,8 +64,7 @@ public class Renderer {
 
     public static void setWindowTitle() {
         String s = "";
-        if(Game.gameMode == 1)
-        {
+        if (Game.gameMode == 1) {
             s = " (Editing)";
         }
         window.setTitle("Bootstrap: " + Game.levelName + s);
@@ -78,7 +77,7 @@ public class Renderer {
     }
 
     public static double getPixelsPerUnit() {
-        return (window.getWidth()/unitsWide);
+        return (window.getWidth() / unitsWide);
     }
 
     public static int getWindowWidth() {

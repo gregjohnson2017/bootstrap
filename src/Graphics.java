@@ -39,7 +39,7 @@ public class Graphics {
         //draw key
         if (k != null) {
             hexText.beginRendering(Renderer.getWindowWidth(), Renderer.getWindowHeight());
-            hexText.setColor(0.9f, 0.5f, 0, 1);
+            hexText.setColor(0.7f, 0.3f, 0, 1);
             // this should draw to the middle of the hexagon
             // note that the draw method takes pixels from bottom left of window, NOT units!
             // this is why it looks so ugly and opaque... ~~~but it works!~~~

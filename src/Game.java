@@ -241,8 +241,6 @@ public class Game {
 
     /**
      * Returns text to be displayed in bottom of window
-     *
-     * @return
      */
     public static String getBotText() {
         switch (gameMode) {
@@ -263,7 +261,7 @@ public class Game {
     public static void setCell(Cell c, int type) {
         // sets this cell to this type
         // except for keys! these are handled differently.
-        if(type != 7) {
+        if (type != 7) {
             c.setType(type);
         }
         // must be in level editor, and either be labelling something OR be giving a key and be allowed to do so
@@ -276,8 +274,8 @@ public class Game {
                         "0");
                 //can have empty label, but NOT empty key
                 goodLabel = true;
-                if(proposedLabel == null || proposedLabel.equals("")) {
-                    if( type != 7) {
+                if (proposedLabel == null || proposedLabel.equals("")) {
+                    if (type != 7) {
                         proposedLabel = ""; // sets to empty
                         goodLabel = true;
                     } else {
@@ -291,7 +289,7 @@ public class Game {
                     goodLabel = false;
                 }
             }
-            if(type != 7) {
+            if (type != 7) {
                 c.label = proposedLabel;
             } else {
                 c.hasKey = true;
@@ -441,6 +439,29 @@ public class Game {
             selectedCell = null;
             selected = false;
         }
+    }
+
+    public static void showEditorHelp() {
+        JOptionPane.showMessageDialog(null,
+                "Scrolling will zoom in and out, and holding right click will pan. \n" +
+                        "Left click on a cell to change its type, (you may be prompted for a label.) \n" +
+                        "Keys must have a nonempty label at can only be put on a player or empty space. \n" +
+                        "To remove a key or change a label, put down the same cell on top. \n" +
+                        "Buttons, doors, and time machines can have an empty label. Labels determine linkage. \n" +
+                        "There can only be one player and one exit. Putting down another will remove the old one. \n" +
+                        "\n" +
+                        "Press a key to change cell type: \n"+
+                        "W = Wall (Dark Gray) \n" +
+                        "E = Empty Space (Light Gray) \n" +
+                        "P = Player (Green)\n" +
+                        "B = Button (Red)\n" +
+                        "O = Open Door (Light Purple)\n" +
+                        "C = Closed Door (Dark Purple)\n" +
+                        "L = Locked Door (Brown)\n" +
+                        "K = Key (Orange Text)\n" +
+                        "X = Exit (Yellow)\n" +
+                        "T = Time Machine (Blue)\n"
+                , "Bootstrap Level Editor", JOptionPane.INFORMATION_MESSAGE);
     }
 
 }

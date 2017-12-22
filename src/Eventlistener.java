@@ -80,10 +80,10 @@ public class Eventlistener implements GLEventListener {
                     if (Game.hasCell(i, j)) {
                         Cell c = Game.getCell(i, j);
                         RGBA = c.getRGBA();
-                        if (c.labelled) {
+                        if (c.labelled && !introAnimation && !outroAnimation) {
                             s = c.label;
                         }
-                        if(c.hasKey) {
+                        if(c.hasKey && !introAnimation && !outroAnimation) {
                             k = c.key;
                         }
                     } else {

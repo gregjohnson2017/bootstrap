@@ -41,12 +41,10 @@ public class Mouseinput implements MouseListener {
             // checks to see if in bounds
             if (-Game.gridRows / 2 <= clickHexX && clickHexX < (float) Game.gridRows / 2
                     && -Game.gridCols / 2 <= clickHexY && clickHexY < (float) Game.gridCols / 2) {
-                // selects this cell
-                Game.selectCell(clickHexX, clickHexY);
-
-                // depending on gamemode, does more action
+                // depending on gamemode, highlights cell and does action, or just changes cell
                 switch (Game.gameMode) {
                     case 0:
+                        Game.selectCell(clickHexX, clickHexY);
                         break;
                     case 1:
                         // will set a new cell type
@@ -61,6 +59,9 @@ public class Mouseinput implements MouseListener {
                         if(t != 7 || c.canHaveKey) {
                             Game.setCell(c, t);
                         }
+                        break;
+                    case 2:
+                        Game.selectCell(clickHexX, clickHexY);
                         break;
                     default:
                         break;

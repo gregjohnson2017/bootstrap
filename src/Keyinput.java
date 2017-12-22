@@ -55,6 +55,8 @@ public class Keyinput implements KeyListener {
                                 break;
                             case 4:
                                 // show help
+                                Game.showEditorHelp();
+                                break;
                             default:
                                 break;
                         }

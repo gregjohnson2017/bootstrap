@@ -119,8 +119,8 @@ public class Cell {
                 break;
             case 4:
                 // open door
-                red = 0.5f;
-                green = 0.4f;
+                red = 0.6f;
+                green = 0.5f;
                 blue = 0.8f;
                 labelled = true;
                 customLabel = true;
@@ -130,8 +130,8 @@ public class Cell {
             case 5:
                 // closed door
                 red = 0.2f;
-                green = 0.2f;
-                blue = 0.3f;
+                green = 0.1f;
+                blue = 0.4f;
                 labelled = true;
                 customLabel = true;
                 passable = false;
@@ -140,8 +140,8 @@ public class Cell {
             case 6:
                 // locked (closed) door
                 red = 0.4f;
-                green = 0.4f;
-                blue = 0.2f;
+                green = 0.3f;
+                blue = 0.3f;
                 labelled = true;
                 customLabel = true;
                 passable = false;

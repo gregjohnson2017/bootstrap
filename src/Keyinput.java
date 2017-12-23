@@ -17,17 +17,14 @@ public class Keyinput implements KeyListener {
 
                 switch (Game.gameMode) {
                     case 0:
-                        break;
-                    case 1:
-                        //escape menu for level editor
-                        String[] opts = {"Save and Play Level",
-                                "Save Level",
-                                "Rename",
-                                "Load Level to Edit",
-                                "Show Help"};
+                        //escape menu for normal play
+                        String[] opts = {"Restart Level",
+                                "Load New Level",
+                                "Edit This Level",
+                                "How to Play"};
                         int a = JOptionPane.showOptionDialog(null,
                                 "DO NOT SCROLL MOUSE IN THIS MENU! WILL CRASH GAME! Hit ESC again to close.",
-                                "Boostrap Level Editor",
+                                "Boostrap",
                                 JOptionPane.YES_NO_CANCEL_OPTION,
                                 JOptionPane.QUESTION_MESSAGE,
                                 null,
@@ -35,9 +32,47 @@ public class Keyinput implements KeyListener {
                                 opts[0]);
                         switch (a) {
                             case 0:
+                                // restart level (loads current)
+                                Game.loadLevel(true);
+                                break;
+                            case 1:
+                                // load new level
+                                Game.loadLevel(false);
+                                break;
+                            case 2:
+                                // edit this level
+                                Game.gameMode = 1;
+                                Game.loadLevel(true);
+                                break;
+                            case 3:
+                                // show help
+                                Game.showGameHelp();
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    case 1:
+                        //escape menu for level editor
+                        String[] opts2 = {"Save and Play Level",
+                                "Save Level",
+                                "Rename",
+                                "Load Level to Edit",
+                                "How to Use Editor"};
+                        int b = JOptionPane.showOptionDialog(null,
+                                "DO NOT SCROLL MOUSE IN THIS MENU! WILL CRASH GAME! Hit ESC again to close.",
+                                "Boostrap Level Editor",
+                                JOptionPane.YES_NO_CANCEL_OPTION,
+                                JOptionPane.QUESTION_MESSAGE,
+                                null,
+                                opts2,
+                                opts2[0]);
+                        switch (b) {
+                            case 0:
                                 // save and play
                                 Game.newCellsFromString(Game.saveLevel());
-                                Game.gameMode = 1;
+                                Game.gameMode = 0;
+                                Game.loadLevel(true);
                                 break;
                             case 1:
                                 // save
@@ -51,7 +86,7 @@ public class Keyinput implements KeyListener {
                             case 3:
                                 // load to edit
                                 // if it doesn't work, doesn't matter - just returns user to editing
-                                Game.loadLevel();
+                                Game.loadLevel(false);
                                 break;
                             case 4:
                                 // show help
@@ -192,6 +227,58 @@ public class Keyinput implements KeyListener {
                     case 1:
                         // exit
                         Game.makeCellType = 9;
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 73:
+                //I key
+                switch (Game.gameMode) {
+                    case 0:
+                        // interact
+                        Game.command = 1;
+                        break;
+                    case 1:
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 77:
+                //M key
+                switch (Game.gameMode) {
+                    case 0:
+                        // move
+                        Game.command = 0;
+                        break;
+                    case 1:
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 17:
+                //CTRL key
+                switch (Game.gameMode) {
+                    case 0:
+                        // switch move and interact command
+                        Game.command = 1-Game.command; //huehuehuehue
+                        break;
+                    case 1:
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 32:
+                //SPACE key
+                switch (Game.gameMode) {
+                    case 0:
+                        // advance timestep
+                        Game.advanceTimestep();
+                        break;
+                    case 1:
                         break;
                     default:
                         break;

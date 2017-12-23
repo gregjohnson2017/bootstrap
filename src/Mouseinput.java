@@ -31,20 +31,62 @@ public class Mouseinput implements MouseListener {
             float a = 0;
             // must flip the Y (around -1...it works...)
             // this is just because the way the hexagons are drawn vs "indexed"
-            int clickHexY = -1 - Math.round((clickUnitYfromCenter - 1.75f) / 1.75f);
-            if (clickHexY % 2 != 0) {
+            int clickHexRow = -1 - Math.round((clickUnitYfromCenter - 1.75f) / 1.75f);
+            if (clickHexRow % 2 != 0) {
                 // must shift
                 a = 1f;
             }
-            int clickHexX = Math.round((clickUnitXfromCenter - 1f + a) / 2);
+            int clickHexCol = Math.round((clickUnitXfromCenter - 1f + a) / 2);
+
+            System.out.println(clickHexRow + ", " + clickHexCol);
 
             // checks to see if in bounds
-            if (-Game.gridRows / 2 <= clickHexX && clickHexX < (float) Game.gridRows / 2
-                    && -Game.gridCols / 2 <= clickHexY && clickHexY < (float) Game.gridCols / 2) {
+            if (-Game.gridRows / 2 <= clickHexRow && clickHexRow < (float) Game.gridRows / 2
+                    && -Game.gridCols / 2 <= clickHexCol && clickHexCol < (float) Game.gridCols / 2) {
                 // depending on gamemode, highlights cell and does action, or just changes cell
                 switch (Game.gameMode) {
                     case 0:
-                        Game.selectCell(clickHexX, clickHexY);
+                        Cell targ = Game.getCell(clickHexRow, clickHexCol);
+                        // depending on command, will try to move or interact
+                        boolean noSelect = false;
+                        switch(Game.command) {
+                            case 0:
+                                //move
+                                // checks to see if cell is passable and no movement is planned
+                                // also if the selected player can actually move there! (must be adjacent)
+                                Cell s = Game.selectedCell;
+                                if(s == null) {
+                                    // no selected cell yet, don't try any movements!
+                                    break;
+                                }
+                                if(targ.passable && !targ.hasMovePlanned
+                                        && Game.checkAdjacent(targ,s) && s.player != null) {
+                                    // possible move!
+                                    s.player.willMove = true;
+                                    s.player.mCol = targ.col;
+                                    s.player.mRow = targ.row;
+                                    // will not select new cell, in fact, deselect
+                                    Game.deselect();
+                                    noSelect = true;
+                                } else if (s.equals(targ) && s.player != null){
+                                    // clicked same cell to move, cancels and deselects
+                                    // doesn't matter if mCol and mRow are still set to something lol
+                                    s.player.willMove = false;
+                                } else {
+                                    // move not possible
+                                }
+                                break;
+                            case 1:
+                                //interact
+
+                                break;
+                            default:
+                                break;
+                        }
+                        // selects new cell
+                        if(!noSelect) {
+                            Game.selectCell(clickHexRow, clickHexCol);
+                        }
                         break;
                     case 1:
                         // will set a new cell type
@@ -55,13 +97,13 @@ public class Mouseinput implements MouseListener {
                             Game.clearCellOfType(t);
                         }
                         // if trying to give a key (t = 7) make sure this is possible (only way this can fail)
-                        Cell c = Game.getCell(clickHexX, clickHexY);
+                        Cell c = Game.getCell(clickHexRow, clickHexCol);
                         if(t != 7 || c.canHaveKey) {
                             Game.setCell(c, t);
                         }
                         break;
                     case 2:
-                        Game.selectCell(clickHexX, clickHexY);
+                        Game.selectCell(clickHexRow, clickHexCol);
                         break;
                     default:
                         break;

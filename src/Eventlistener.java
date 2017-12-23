@@ -12,6 +12,8 @@ public class Eventlistener implements GLEventListener {
     private double rot = 0;
     private double rad = 0;
 
+    private double moveGhost = 0; // move ghosting, from 0 to 1. Always incrementing
+
     public static boolean pauseRendering = false;
 
     public static boolean introAnimation = false;
@@ -61,6 +63,7 @@ public class Eventlistener implements GLEventListener {
 
 
             int a = 0;
+            int b = 0;
 
             // will draw hexagons as far as you can zoom, (taking maximum dimension)
             int totalSize = (int) Math.max(Renderer.maxUnitsWide, Renderer.getUnitsTall(Renderer.maxUnitsWide));
@@ -68,23 +71,46 @@ public class Eventlistener implements GLEventListener {
             for (int i = -totalSize; i < totalSize; i++) {
                 for (int j = -totalSize; j < totalSize; j++) {
                     // parity for grid offset
-                    if (j % 2 == 0) {
+                    if (i % 2 == 0) {
                         a = 1;
                     } else {
                         a = 0;
                     }
                     // adds colored cell if it can, otherwise sets it to black
                     float[] RGBA = new float[4];
-                    String s = null;
-                    String k = null;
+                    String label = null;
+                    String key = null;
+                    String age = null;
                     if (Game.hasCell(i, j)) {
                         Cell c = Game.getCell(i, j);
                         RGBA = c.getRGBA();
                         if (c.labelled && !introAnimation && !outroAnimation) {
-                            s = c.label;
+                            label = c.label;
                         }
-                        if(c.hasKey && !introAnimation && !outroAnimation) {
-                            k = c.key;
+                        if (c.hasKey && !introAnimation && !outroAnimation) {
+                            key = c.getKey();
+                        }
+                        if (c.getType() == 3 && c.player != null && !introAnimation && !outroAnimation
+                                && Game.gameMode == 0) {
+                            age = c.player.getAge(); // does not show in editor
+                            // if it gets this far, also checks for ghost
+                            if (c.player.willMove) {
+                                // oh boy! draws a spooky ghost.
+                                double mi = c.player.mRow;
+                                double mj = c.player.mCol;
+                                if (mi % 2 == 0) {
+                                    b = 1;
+                                } else {
+                                    b = 0;
+                                }
+                                // sets alpha to new thing really quick
+                                RGBA[3] = (float) (1 - moveGhost);
+                                Graphics.drawCells(((2 * j + a) * (1 - moveGhost)) + ((2 * mj + b) * (moveGhost)),
+                                        ((1.75 * i) * (1 - moveGhost)) + ((1.75 * mi) * (moveGhost)), rad, rot, RGBA,
+                                        null, null, null);
+                                // sets alpha back
+                                RGBA[3] = c.getRGBA()[3];
+                            }
                         }
                     } else {
                         RGBA[0] = 0;
@@ -92,7 +118,7 @@ public class Eventlistener implements GLEventListener {
                         RGBA[2] = 0;
                         RGBA[3] = 1;
                     }
-                    Graphics.fillHex(2 * i + a, 1.75 * j, rad, rot, RGBA, s,k);
+                    Graphics.drawCells(2 * j + a, 1.75 * i, rad, rot, RGBA, label, key, age);
                 }
             }
 
@@ -133,12 +159,22 @@ public class Eventlistener implements GLEventListener {
                 outroAnimationBegun = false;
             }
 
-            // now renders the bottom text
+            // now renders the top and bottom text
             TextRenderer botRend = new TextRenderer(new Font("Ariel", Font.BOLD, 18));
             botRend.beginRendering(Renderer.getWindowWidth(), Renderer.getWindowHeight());
             botRend.setColor(1, 1, 1, 0.8f);
             botRend.draw(Game.getBotText(), 5, 7);
+            botRend.draw("ESC for Menu", 5, Renderer.getWindowHeight() - 15);
             botRend.endRendering();
+
+
+            //move ghost
+
+            if (moveGhost < 1) {
+                moveGhost += 0.02;
+            } else {
+                moveGhost = 0;
+            }
 
         }
     }

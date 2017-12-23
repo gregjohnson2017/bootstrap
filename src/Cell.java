@@ -25,18 +25,17 @@ public class Cell {
     public boolean unique = false;
 
     public boolean passable = false; // player can move through entity
+    public boolean hasMovePlanned = false; // a player is planning on moving to this cell!
 
     public boolean useable = false; // player can use
 
-    public String key = "";
+    private String key = "";
     public boolean hasKey = false;
     public boolean canHaveKey = false;
 
-    /**
-     * 0 = empty space
-     * 1 = wall
-     */
     private int cellType = 0; //cell type (for automatic color setting)
+
+    public Player player = null; //cell has a reference to the player it represents
 
     public void propFromString(String propString) {
         //gets properties from a string, (assumes well-formatted!)
@@ -76,6 +75,8 @@ public class Cell {
             hasKey = false;
             key = "";
         }
+        // removes player (will make new if need be)
+        player = null; //I hope this doesn't kill the player in Game's array... LOL idk how java works
         switch (cellType) {
             case 0:
                 // empty space
@@ -116,6 +117,9 @@ public class Cell {
                 customLabel = false;
                 passable = false;
                 canHaveKey = true;
+                player = Game.players.get(0); // should be first in array if autopropping
+                player.col = col;
+                player.row = row;
                 break;
             case 4:
                 // open door
@@ -153,8 +157,8 @@ public class Cell {
                 red = 0;
                 green = 0.2f;
                 blue = 0.8f;
-                labelled = true;
-                customLabel = true;
+                labelled = false;
+                customLabel = false;
                 passable = false;
                 canHaveKey = false;
                 break;
@@ -250,5 +254,17 @@ public class Cell {
             default:
                 return "INVALID CELL TYPE";
         }
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+        Boolean hasKey = true;
+        if(player != null) {
+            player.key = key;
+        }
+    }
+
+    public String getKey() {
+        return key;
     }
 }

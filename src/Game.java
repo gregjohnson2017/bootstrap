@@ -16,9 +16,11 @@ public class Game {
     public static ArrayList<Cell> cells = new ArrayList<Cell>();
     public static ArrayList<Cell> newCells = new ArrayList<Cell>(); // for loading
 
+    public static String currentLevelString = ""; // string for currently loaded level
+
     // selected cell
-    private static Cell selectedCell = null;
-    private static boolean selected = false; // something is selected
+    public static Cell selectedCell = null;
+    public static boolean selected = false; // something is selected
 
     public static int gameMode = -1; // 0 = regular gameplay, 1 = editor, 2 = test grid (-1 = quit at title screen)
 
@@ -27,6 +29,13 @@ public class Game {
     public static int makeCellType = 0; // integer to determine which cell to make
 
     public static boolean firstLoad = true; // load at beginning (for animations...)
+
+    public static int command = 0; // command in game (move or interact)
+
+    public static int currentTimestep = 0; // current time step
+
+    public static int highestBootnum = 0; // highest bootnum of any player (needs to be kept updated...!)
+    public static ArrayList<Player> players = new ArrayList<Player>(); // array of players
 
     /**
      * Runs game in usual gameplay.
@@ -41,6 +50,8 @@ public class Game {
             f.mkdirs();
         }
 
+        //gives first player, even if user only uses editor
+        players.add(new Player());
 
         String[] opts = {"Play Level",
                 "Level Editor",
@@ -58,6 +69,18 @@ public class Game {
             case 0:
                 // level selection
                 gameMode = 0;
+                //load previous level
+                if (!loadLevel(false)) {
+                    // user cancelled
+                    // just ends code, I'm too lazy to return user to a previous menu at this time
+                    System.exit(0);
+                }
+                // needs to set cells
+                cells.addAll(newCells);
+                newCells.clear();
+                firstLoad = false;
+                Eventlistener.introAnimation = true;
+                Renderer.init();
                 break;
             case 1:
                 // level editor
@@ -94,7 +117,7 @@ public class Game {
         switch (loadOrCreate) {
             case 0:
                 //load previous level
-                if (!loadLevel()) {
+                if (!loadLevel(false)) {
                     // user cancelled
                     // just ends code, I'm too lazy to return user to a previous menu at this time
                     System.exit(0);
@@ -131,36 +154,42 @@ public class Game {
         Renderer.init();
     }
 
-    public static boolean loadLevel() {
+    public static boolean loadLevel(boolean reloadCurrent) {
         // load level dialogue
         // returns boolean if successful
         // outro animation then pauses once complete
         //the event listener calls another method to finish loading
         Eventlistener.pauseRendering = true;
         boolean success = true;
-        String fileText = "";
-        final JFileChooser fc = new JFileChooser("./levels");
-        int returnVal = fc.showOpenDialog(null);
-        File f;
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            f = fc.getSelectedFile();
-            FileReader fr = null;
-            try {
-                fr = new FileReader(f.getPath());
-            } catch (FileNotFoundException e1) {
-                e1.printStackTrace();
-            }
-            BufferedReader br = new BufferedReader(fr);
-            try {
-                fileText = br.readLine(); //should only be one line...
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (!reloadCurrent) {
+            String fileText = "";
+            final JFileChooser fc = new JFileChooser("./levels");
+            int returnVal = fc.showOpenDialog(null);
+            File f;
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                f = fc.getSelectedFile();
+                FileReader fr = null;
+                try {
+                    fr = new FileReader(f.getPath());
+                } catch (FileNotFoundException e1) {
+                    e1.printStackTrace();
+                }
+                BufferedReader br = new BufferedReader(fr);
+                try {
+                    fileText = br.readLine(); //should only be one line...
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                currentLevelString = fileText;
+            } else {
+                success = false;
             }
 
-            newCellsFromString(fileText);
-        } else {
-            success = false;
         }
+
+        // gets new cells, either from current level to restart or new level from above file read
+        newCellsFromString(currentLevelString);
+
         Eventlistener.pauseRendering = false;
 
         if (success) {
@@ -205,7 +234,7 @@ public class Game {
     }
 
     public static String saveLevel() {
-        // saves current level to file
+        // saves current level to file, and sets current level text too
         // also returns the string, if any other method wants to load it right away
         // assumes level is already named, (in game class)
         // right now doesn't matter if in editor or not, but option is only available in editor
@@ -216,6 +245,7 @@ public class Game {
             saveString += c.writePropString();
         }
         saveString = levelName + "[" + gridRows + "][" + gridCols + "]" + saveString;
+        currentLevelString = saveString;
         //writes to file
         PrintWriter writer = null;
         try {
@@ -245,7 +275,29 @@ public class Game {
     public static String getBotText() {
         switch (gameMode) {
             case 0:
-                return "Good luck!";
+                String s = "";
+                // timestep
+                s += "Timestep: " + currentTimestep;
+                // now selected cell
+                if (selected) {
+                    s += " | Selected: " + selectedCell.getCellName(selectedCell.getType());
+                } else {
+                    s += " | No Selection";
+                }
+                // now move or interact depending on command
+                s += " | Command: ";
+                switch (command) {
+                    case 0:
+                        s += "Move";
+                        break;
+                    case 1:
+                        s += "Interact";
+                        break;
+                    default:
+                        s += "NO COMMAND (this is an error...)";
+                        break;
+                }
+                return s;
             case 1:
                 // gets name of cell that player can make by clicking
                 return "Make Cell: " + Cell.getCellName(makeCellType);
@@ -256,6 +308,15 @@ public class Game {
         }
 
         return "Nothing to display.";
+    }
+
+    public static void advanceTimestep() {
+        // code for advancing timestep including animations, new grid, etc.
+        // if this is the first timestep, adds first player to players array
+
+
+        // advances timestep integer
+        currentTimestep++;
     }
 
     public static void setCell(Cell c, int type) {
@@ -293,10 +354,36 @@ public class Game {
                 c.label = proposedLabel;
             } else {
                 c.hasKey = true;
-                c.key = proposedLabel;
+                c.setKey(proposedLabel);
             }
         }
 
+    }
+
+    public static boolean checkAdjacent(Cell c1, Cell c2) {
+        // checks adjacency between cells
+        // returns false if same cell!
+        if (c1.row == c2.row && Math.abs(c1.col - c2.col) == 1) {
+            // same row, one appart
+            System.out.println("same row");
+            return true;
+        }
+        // otherwise, has to switch on parity of first cell's row
+        switch (c1.row % 2) {
+            case 0:
+                // even rows keep column to left
+                if (Math.abs(c1.row - c2.row) == 1 && (c1.col == c2.col || c1.col == c2.col - 1)) {
+                    return true;
+                }
+                break;
+            default:
+                // odd rows keep column to right
+                if (Math.abs(c1.row - c2.row) == 1 && (c1.col == c2.col || c1.col == c2.col + 1)) {
+                    return true;
+                }
+                break;
+        }
+        return false;
     }
 
     /**
@@ -450,7 +537,7 @@ public class Game {
                         "Buttons, doors, and time machines can have an empty label. Labels determine linkage. \n" +
                         "There can only be one player and one exit. Putting down another will remove the old one. \n" +
                         "\n" +
-                        "Press a key to change cell type: \n"+
+                        "Press a key to change cell type: \n" +
                         "W = Wall (Dark Gray) \n" +
                         "E = Empty Space (Light Gray) \n" +
                         "P = Player (Green)\n" +
@@ -462,6 +549,47 @@ public class Game {
                         "X = Exit (Yellow)\n" +
                         "T = Time Machine (Blue)\n"
                 , "Bootstrap Level Editor", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public static void showGameHelp() {
+        JOptionPane.showMessageDialog(null,
+                "Bootstrap is a puzzle game that incorporates time travel. \n" +
+                        "Click on a cell to select or deselect it, (if the cell is selectable.) \n" +
+                        "Press (I) to interact, and (M) to move. (CTRL) toggles between them. \n" +
+                        "\n" +
+                        "Selecting a player and then clicking an adjacent cell in move mode will plan a move. \n" +
+                        "This move will be completed in the next time step. Click on the player to cancel. \n" +
+                        "Players can move through empty space, open doors, onto buttons, and time machines. \n" +
+                        "To win the puzzle, move onto the exit after fulfilling all bootstraps (see below).  \n" +
+                        "\n" +
+                        "If a player moves onto a button, it will open or close doors with the same label. \n" +
+                        "A button will deactivate if the player moves off. \n" +
+                        "A closing door will kill any player under it! Players move first, then doors open/close. \n" +
+                        "\n" +
+                        "If you move onto an empty space with a key, that player will automatically pick it up. \n" +
+                        "Interact with another player to give them a key, or empty space to drop it. \n" +
+                        "Keys can be used to unlock doors, which will turn them into open doors. \n " +
+                        "Each player can only hold one key, (they are extremely heavy.) \n" +
+                        "\n" +
+                        "Press (SPACE) to advance timestep. This will manifest all movements. \n" +
+                        "This will also cause players to age, displayed in red text on the player. \n" +
+                        "A question mark indicates that the player is at least this old, (if bootstrapped.) \n" +
+                        "More than one question mark indicates the order in which the players were bootstrapped. \n" +
+                        "\n" +
+                        "Time machines are the exciting element that makes Bootstrap a unique puzzle game. \n" +
+                        "Players can interact with time machines in two ways: Bootstrapping, and Fulfilling. \n" +
+                        "When bootstrapping, the player summons a version of their self from the future to appear. \n" +
+                        "This player can be bootstrapped holding a key, itself said to be bootstrapped. \n" +
+                        "Every additional bootstrapped player will receive another question mark by their age. \n " +
+                        "The time machine must be vacant at the moment of bootstrapping! \n" +
+                        "All bootstrapped players and keys must be 'fulfilled' before completing the puzzle. \n" +
+                        "This means a younger player (perhaps with a key) must be sent back in time. \n" +
+                        "You must fulfill bootstraps with a player exactly one question mark older. \n" +
+                        "This is to prevent older players from 'growing up' to become younger players. \n" +
+                        "\n" +
+                        "After completing a puzzle, you can 'view' your solution through the eyes of the player! \n" +
+                        "This is the only time you actually experience time travel. The game is otherwise linear. \n"
+                , "Bootstrap", JOptionPane.INFORMATION_MESSAGE);
     }
 
 }

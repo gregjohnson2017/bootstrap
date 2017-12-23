@@ -10,7 +10,8 @@ public class Graphics {
 
     private static TextRenderer hexText = new TextRenderer(new Font("Ariel", Font.BOLD, 12));
 
-    public static void drawCells(double x, double y, double rad, double rot, float[] RGBA, String s, String k, String a) {
+    public static void drawCells(double x, double y, double rad, double rot, float[] RGBA,
+                                 String l, String k, String a) {
         gl = Eventlistener.gl;
 
         gl.glColor4f(RGBA[0], RGBA[1], RGBA[2], RGBA[3]);
@@ -27,14 +28,14 @@ public class Graphics {
 
 
         //draw label
-        if (s != null) {
+        if (l != null) {
             hexText.beginRendering(Renderer.getWindowWidth(), Renderer.getWindowHeight());
             hexText.setColor(1, 1, 1, 1);
             // this should draw to the middle of the hexagon
             // note that the draw method takes pixels from bottom left of window, NOT units!
             // this is why it looks so ugly and opaque... ~~~but it works!~~~
-            hexText.draw(s, (int) ((x - Renderer.centerOffX + Renderer.unitsWide / 2) * Renderer.getPixelsPerUnit()
-                            - s.length() * 2),
+            hexText.draw(l, (int) ((x - Renderer.centerOffX + Renderer.unitsWide / 2) * Renderer.getPixelsPerUnit()
+                            - l.length() * 2),
                     (int) ((Renderer.getUnitsTall(Renderer.unitsWide) / 2 + y - Renderer.centerOffY)
                             * Renderer.getPixelsPerUnit())); // "- s.length()*2" shifts over to center text kinda
             hexText.endRendering();

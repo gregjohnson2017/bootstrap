@@ -1,6 +1,8 @@
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 
+import javax.swing.*;
+
 public class Mouseinput implements MouseListener {
 
     private int x = 0;
@@ -52,6 +54,7 @@ public class Mouseinput implements MouseListener {
                                 //move
                                 // checks to see if cell is passable and no movement is planned
                                 // also if the selected player can actually move there! (must be adjacent)
+                                // finally, makes sure not too many keys coming together
                                 Cell s = Game.selectedCell;
                                 if(s == null) {
                                     // no selected cell yet, don't try any movements!
@@ -60,12 +63,24 @@ public class Mouseinput implements MouseListener {
                                 if(targ.getPassable() && !targ.hasMovePlanned
                                         && Game.checkAdjacent(targ,s) && s.player != null) {
                                     // possible move!
-                                    s.player.willMove = true;
-                                    s.player.mCol = targ.col;
-                                    s.player.mRow = targ.row;
-                                    // will not select new cell, in fact, deselect
-                                    Game.deselect();
-                                    noSelect = true;
+                                    // checks for too many keys
+                                    if(s.numKeys() + targ.numKeys() > Game.maxKeys) {
+                                        // too many!
+                                        JOptionPane.showMessageDialog(null,
+                                                "Too many keys in one spot!",
+                                                "Cannot move!",
+                                                JOptionPane.WARNING_MESSAGE);
+                                        // will not select new cell, in fact, deselect
+                                        Game.deselect();
+                                        noSelect = true;
+                                    } else {
+                                        s.player.willMove = true;
+                                        s.player.mCol = targ.col;
+                                        s.player.mRow = targ.row;
+                                        // will not select new cell, in fact, deselect
+                                        Game.deselect();
+                                        noSelect = true;
+                                    }
                                 } else if (s.equals(targ) && s.player != null){
                                     // clicked same cell to move, cancels and deselects
                                     // doesn't matter if mCol and mRow are still set to something lol

@@ -88,7 +88,7 @@ public class Eventlistener implements GLEventListener {
                     String label = null;
                     String key = null;
                     String age = null;
-                    Boolean drawOld = false;
+                    boolean drawOld = false;
                     Cell c = null;
                     if (Game.hasCell(i, j)) {
                         c = Game.getCell(i, j);
@@ -96,8 +96,16 @@ public class Eventlistener implements GLEventListener {
                         if (c.labelled && !introAnimation && !outroAnimation) {
                             label = c.label;
                         }
-                        if (c.hasKey && !introAnimation && !outroAnimation) {
-                            key = c.getKey();
+                        if (c.hasKeys() && !introAnimation && !outroAnimation) {
+                            for(int k = 0; k < Game.maxKeys; k++) {
+                                if(k == 0) {
+                                    key = "";
+                                }
+                                if(k > 0 && !c.getKey(k).equals("")) {
+                                    key += ",";
+                                }
+                                key += c.getKey(k);
+                            }
                         }
                         if (c.player != null && !introAnimation && !outroAnimation
                                 && Game.gameMode == 0) {
@@ -141,8 +149,9 @@ public class Eventlistener implements GLEventListener {
                     if (drawOld) {
                         //draws empty tile in the player's place
                         //assumes c has been defined above
+                        //player cannot leave keys behind in old cell, so removes
                         RGBA = c.getRGBA(true);
-                        Graphics.drawCells(2 * j + a, 1.75 * i, rad, rot, RGBA, label, key, null);
+                        Graphics.drawCells(2 * j + a, 1.75 * i, rad, rot, RGBA, label, null, null);
                     } else {
                         Graphics.drawCells(2 * j + a, 1.75 * i, rad, rot, RGBA, label, key, age);
                     }
@@ -174,7 +183,7 @@ public class Eventlistener implements GLEventListener {
                     Game.cells.addAll(Game.newCells);
                     Game.newCells.clear();
                     //sets up renderer again
-                    Renderer.setUnitsWide(Math.max(2 * Game.gridRows, 2 * Game.gridCols));
+                    Renderer.setUnitsWide(Math.max(3 * Game.gridRows, 3 * Game.gridCols));
                     Renderer.setWindowTitle();
                     //does intro animation
                     introAnimation = true;

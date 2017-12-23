@@ -9,8 +9,8 @@ public class Renderer {
 
     private static GLWindow window = null;
 
-    public static int screenW = 640;
-    public static int screenH = 360;
+    public static int screenW = 1280;
+    public static int screenH = 640;
 
     public static final int FPS = 60;
 

@@ -10,8 +10,38 @@ public class Player {
     public int mRow = 0;
     public boolean willMove = false;
 
-    public String key = "";
-    public boolean hasKey = false;
+    private String[] keys = new String[Game.maxKeys];
+
+    public Player() {
+        // populates keys (causing problems?)
+
+        for(int k = 0; k < Game.maxKeys; k++) {
+            keys[k] = "";
+        }
+    }
+
+    public void resetKeys() {
+        // resets all keys
+        for(int k = 0; k < Game.maxKeys; k++) {
+            setKey("",k);
+        }
+    }
+
+    public void setKey(String key, int k) {
+        keys[k] = key;
+    }
+
+    public void setAllKeys(String[] keys) {
+        this.keys = keys;
+    }
+
+    public String getKey(int k) {
+        return keys[k];
+    }
+
+    public String[] getKeyArray() {
+        return keys;
+    }
 
     public String getAge() {
         // returns age string
@@ -24,6 +54,16 @@ public class Player {
         }
         age += "" + (Game.currentTimestep - birthday);
         return age;
+    }
+
+    public boolean hasKeys() {
+        // figures out of the player has any keys
+        for(int i = 0; i < Game.maxKeys; i++) {
+            if(!keys[i].equals("")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void move() {

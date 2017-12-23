@@ -6,12 +6,13 @@ public class Game {
 
     // grid size (for panning)
     // this is number of hexagons!
-    public static int gridRows = 20;
-    public static int gridCols = 20;
+    public static int gridRows = 5;
+    public static int gridCols = 5;
 
 
-    public static int gridMax = 30;//maximum grid size (beyond 30 it gets laggy...)
-    public static int gridDefault = 5;//default grid size (X and Y)
+    public static final int gridMax = 10;//maximum grid size (terrible renderer gets laggy at 10 already...)
+    public static final int gridDefault = 5;//default grid size (X and Y)
+    public static final int maxKeys = 3; // max keys in a cell/player (any given array)
 
     public static ArrayList<Cell> cells = new ArrayList<Cell>();
     public static ArrayList<Cell> newCells = new ArrayList<Cell>(); // for loading
@@ -55,8 +56,7 @@ public class Game {
         players.add(new Player());
 
         String[] opts = {"Play Level",
-                "Level Editor",
-                "Holiday Test Grid"};
+                "Level Editor"};
         gameMode = JOptionPane.showOptionDialog(null,
                 "Bootstrap, a game by Alex Johnson. Please select:",
                 "Bootstrap",
@@ -90,6 +90,7 @@ public class Game {
                 break;
             case 2:
                 // test grid
+                // option has been removed for now :(
                 gameMode = 2;
                 testGrid();
                 break;
@@ -134,7 +135,7 @@ public class Game {
                 //draws level editor grid
 
                 // sets initial zoom and maximum zoom
-                Renderer.setUnitsWide(Math.max(2 * gridRows, 2 * gridCols));
+                Renderer.setUnitsWide(Math.max(3 * gridRows, 3 * gridCols));
 
                 for (int i = 0; i < gridRows; i++) {
                     for (int j = 0; j < gridCols; j++) {
@@ -197,7 +198,7 @@ public class Game {
             if (firstLoad) {
                 // only do intro animation
                 //sets up renderer again
-                Renderer.setUnitsWide(Math.max(2 * Game.gridRows, 2 * Game.gridCols));
+                Renderer.setUnitsWide(Math.max(3 * Game.gridRows, 3 * Game.gridCols));
             } else {
                 // have event listener handle outro and rest of load
                 Eventlistener.finishLoad = true;
@@ -317,7 +318,7 @@ public class Game {
         // code for advancing timestep including animations, new grid, etc.
         // tells eventlistener to do animation IF anything is moving
         // only does this if not locked! (in animation for example)
-        if(!lockTimestep) {
+        if (!lockTimestep) {
             lockTimestep = true;
             boolean movingPlayers = false;
             for (Cell c : cells) {
@@ -339,13 +340,17 @@ public class Game {
 
     public static void finishTimestep() {
         // updates cell array and stuff for moving players
-        for(Cell c: cells) {
-            if(c.hasMovingPlayer()) {
+        for (Cell c : cells) {
+            if (c.hasMovingPlayer()) {
                 // gives player to new cell, removes from old
-                Cell d = getCell(c.player.mRow,c.player.mCol);
-                d.player = c.player;
-                d.player.move();
+                // also merges keys (assumes no overflow! this was checked eariler...)
+                Cell d = getCell(c.player.mRow, c.player.mCol);
+                c.addAllKeys(d.getKeyArray()); //adds keys to old cell
+                d.player = c.player; //sets new cell to player
                 c.player = null;
+                // player should have key array...
+                c.clearKeys();
+                d.player.move();
             }
         }
         // unlocks
@@ -359,7 +364,8 @@ public class Game {
             c.setType(type);
         }
         // must be in level editor, and either be labelling something OR be giving a key and be allowed to do so
-        if (gameMode == 1 && ((c.customLabel && type != 7) || (type == 7 && c.canHaveKey))) {
+        if (gameMode == 1 && ((c.customLabel && type != 7) || (type == 7 && c.canHaveKey
+                && c.firstEmptyKeyIndex() >= 0))) {
             // forbids user from using brackets in label!!!
             boolean goodLabel = false;
             String proposedLabel = null;
@@ -376,8 +382,10 @@ public class Game {
                         //cannot have empty key!
                         goodLabel = false;
                     }
-                } else if (proposedLabel.contains("[") || proposedLabel.contains("]")) {
-                    JOptionPane.showMessageDialog(null, "Label cannot contain '[' or '']!",
+                } else if (proposedLabel.contains("[") || proposedLabel.contains("]")
+                        || proposedLabel.contains("|") || proposedLabel.contains(",")) {
+                    JOptionPane.showMessageDialog(null, "Label cannot contain '[' ']' '|' " +
+                                    "or ','!",
                             "Naming Level",
                             JOptionPane.WARNING_MESSAGE);
                     goodLabel = false;
@@ -386,14 +394,21 @@ public class Game {
             if (type != 7) {
                 c.label = proposedLabel;
             } else {
-                c.hasKey = true;
-                c.setKey(proposedLabel);
+                c.addKey(proposedLabel);
             }
+        } else if (type == 7 && c.canHaveKey
+                && c.firstEmptyKeyIndex() == -1) {
+            // too many keys
+            JOptionPane.showMessageDialog(null, "Too many keys!",
+                    "Cannot add key",
+                    JOptionPane.WARNING_MESSAGE);
         }
         // otherwise, is setting to player (on empty space)
-        if(type == 3) {
+        // this is called during level editor, so resets keys here
+        if (type == 3) {
             c.setType(0);
             c.player = players.get(0);
+            c.player.resetKeys();
         }
 
     }
@@ -482,7 +497,7 @@ public class Game {
         askGridSize();
 
         // sets initial zoom and maximum zoom
-        Renderer.unitsWide = Math.max(2 * gridRows, 2 * gridCols);
+        Renderer.unitsWide = Math.max(3 * gridRows, 3 * gridCols);
         Renderer.maxUnitsWide = Renderer.unitsWide * 2;
 
         // creates test grid

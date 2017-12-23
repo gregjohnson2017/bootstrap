@@ -29,8 +29,7 @@ public class Cell {
 
     public boolean useable = false; // player can use
 
-    private String key = "";
-    public boolean hasKey = false;
+    private String[] keys = new String[Game.maxKeys];
     public boolean canHaveKey = false;
 
     private int cellType = 0; //cell type (for automatic color setting)
@@ -49,7 +48,7 @@ public class Cell {
         int i3 = rest2.indexOf('|');
         cellType = Integer.parseInt(rest2.substring(0, i3));
         // if 3, makes empty cell and gives player
-        if(cellType == 3) {
+        if (cellType == 3) {
             cellType = 0;
             player = Game.players.get(0);
         }
@@ -57,12 +56,12 @@ public class Cell {
         int i4 = rest3.indexOf('|');
         label = rest3.substring(0, i4);
         String rest4 = rest3.substring(i4 + 1);
-        key = rest4.substring(0, rest4.length() - 1);
-        if (!key.equals("")) {
-            // actually has a key
-            hasKey = true;
+        for (int i = 0; i < Game.maxKeys; i++) {
+            int i5 = rest4.indexOf(',');
+            setKey(rest4.substring(0, i5), i);
+            rest4 = rest4.substring(i5 + 1);
         }
-        autoProp(false,false);
+        autoProp(false, false);
     }
 
     public String writePropString() {
@@ -70,10 +69,14 @@ public class Cell {
         // only writes properties that cannot be inferred (e.g. does not include RGBA)
         // will make cellType = 3 temporarily if this is player!
         int tempType = cellType;
-        if(player != null) {
+        if (player != null) {
             cellType = 3;
         }
-        String propString = "[" + row + "|" + col + "|" + cellType + "|" + label + "|" + key + "]";
+        String propString = "[" + row + "|" + col + "|" + cellType + "|" + label + "|";
+        for (int i = 0; i < Game.maxKeys; i++) {
+            propString += getKey(i) + ",";
+        }
+        propString += "]";
         cellType = tempType;
         return propString;
     }
@@ -83,10 +86,14 @@ public class Cell {
      */
     public void autoProp(boolean removeKeys, boolean removePlayer) {
         if (removeKeys) {
-            hasKey = false;
-            key = "";
+            for (int i = 0; i < Game.maxKeys; i++) {
+                keys[i] = "";
+                if (player != null) {
+                    player.setKey("", i);
+                }
+            }
         }
-        if(removePlayer) {
+        if (removePlayer) {
             player = null;
         }
         switch (cellType) {
@@ -213,7 +220,7 @@ public class Cell {
         // sets type and formats cell
         // will clear key if this is called (setCell in Game will not call if giving key or player)
         this.cellType = cellType;
-        autoProp(true,true);
+        autoProp(true, true);
     }
 
     public boolean getPassable() {
@@ -257,14 +264,6 @@ public class Cell {
         }
 
         return RGBA;
-    }
-
-    public boolean hasPlayer() {
-        // returns true if the cell has a player
-        if (player != null) {
-            return true;
-        }
-        return false;
     }
 
     public boolean hasMovingPlayer() {
@@ -354,24 +353,110 @@ public class Cell {
             default:
                 return "INVALID CELL TYPE";
         }
-        if(player != null) {
+        if (player != null) {
             r += " with Player";
         }
-        if(hasKey) {
-            r += " with Key";
+        if (hasKeys()) {
+            r += " with Key(s)";
         }
         return r;
     }
 
-    public void setKey(String key) {
-        this.key = key;
-        Boolean hasKey = true;
+    public void setKey(String key, int i) {
         if (player != null) {
-            player.key = key;
+            player.setKey(key, i);
+        } else {
+            keys[i] = key;
         }
     }
 
-    public String getKey() {
-        return key;
+    public String getKey(int i) {
+        if (player != null) {
+            return player.getKey(i);
+        }
+        return keys[i];
+    }
+
+    public String[] getKeyArray() {
+        if (player != null) {
+            return player.getKeyArray();
+        }
+        return keys;
+    }
+
+    public void clearKeys() {
+        // clears keys from cell, and player too if there is one
+        for (int i = 0; i < Game.maxKeys; i++) {
+            keys[i] = "";
+            if (player != null) {
+                player.resetKeys();
+                break;
+            }
+        }
+    }
+
+    public void addKey(String key) {
+        // tries to add key to first empty spot in array
+        if (firstEmptyKeyIndex() >= 0) {
+            for (int i = 0; i < Game.maxKeys; i++) {
+                if (getKey(i).equals("")) {
+                    setKey(key, i);
+                    break;
+                }
+            }
+        } else {
+            System.out.println("Tried to add key to full array! :(");
+        }
+
+    }
+
+    public boolean hasKeys() {
+        // figures out of the cell (or player) has any keys
+        for (int i = 0; i < Game.maxKeys; i++) {
+
+            if (getKey(i) == null) {
+                System.out.println("null key!!!");
+                continue;
+            }
+            if (!getKey(i).equals("")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void addAllKeys(String[] newKeys) {
+        // adds all keys in newKeys to current array
+        // assumes no overflow!
+        int feki = firstEmptyKeyIndex();
+        if (feki >= 0) {
+            for (int k = 0; k < Game.maxKeys; k++) {
+                if (newKeys[k].equals("")) {
+                    // stop adding
+                    break;
+                }
+                addKey(newKeys[k]);
+            }
+        }
+    }
+
+    public int firstEmptyKeyIndex() {
+        // returns first empty index, or -1 if no empty spots
+        for (int k = 0; k < Game.maxKeys; k++) {
+            if (getKey(k).equals("")) {
+                return k;
+            }
+        }
+        return -1;
+    }
+
+    public int numKeys() {
+        int r = 0;
+        for (int i = 0; i < Game.maxKeys; i++) {
+            if (!getKey(i).equals("")) {
+                r++;
+            }
+        }
+        return r;
     }
 }

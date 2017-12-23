@@ -24,7 +24,7 @@ public class Cell {
     // for players, this is true but only per label (for editor usage)
     public boolean unique = false;
 
-    public boolean passable = false; // player can move through entity
+    private boolean passable = false; // player can move through entity
     public boolean hasMovePlanned = false; // a player is planning on moving to this cell!
 
     public boolean useable = false; // player can use
@@ -35,7 +35,7 @@ public class Cell {
 
     private int cellType = 0; //cell type (for automatic color setting)
 
-    public Player player = null; //cell has a reference to the player it represents
+    public Player player = null; //cell has a reference to the player it represents, kept null if no player
 
     public void propFromString(String propString) {
         //gets properties from a string, (assumes well-formatted!)
@@ -48,6 +48,11 @@ public class Cell {
         String rest2 = rest1.substring(i2 + 1);
         int i3 = rest2.indexOf('|');
         cellType = Integer.parseInt(rest2.substring(0, i3));
+        // if 3, makes empty cell and gives player
+        if(cellType == 3) {
+            cellType = 0;
+            player = Game.players.get(0);
+        }
         String rest3 = rest2.substring(i3 + 1);
         int i4 = rest3.indexOf('|');
         label = rest3.substring(0, i4);
@@ -57,26 +62,33 @@ public class Cell {
             // actually has a key
             hasKey = true;
         }
-        autoProp(false);
+        autoProp(false,false);
     }
 
     public String writePropString() {
         // writes all properties to string (for saving)
         // only writes properties that cannot be inferred (e.g. does not include RGBA)
+        // will make cellType = 3 temporarily if this is player!
+        int tempType = cellType;
+        if(player != null) {
+            cellType = 3;
+        }
         String propString = "[" + row + "|" + col + "|" + cellType + "|" + label + "|" + key + "]";
+        cellType = tempType;
         return propString;
     }
 
     /**
      * Automatically sets cell colors and properties due to cell type
      */
-    public void autoProp(boolean removeKeys) {
-        if(removeKeys) {
+    public void autoProp(boolean removeKeys, boolean removePlayer) {
+        if (removeKeys) {
             hasKey = false;
             key = "";
         }
-        // removes player (will make new if need be)
-        player = null; //I hope this doesn't kill the player in Game's array... LOL idk how java works
+        if(removePlayer) {
+            player = null;
+        }
         switch (cellType) {
             case 0:
                 // empty space
@@ -108,19 +120,21 @@ public class Cell {
                 passable = true;
                 canHaveKey = false;
                 break;
-            case 3:
-                // player
-                red = 0;
-                green = 1;
-                blue = 0;
-                labelled = true;
-                customLabel = false;
-                passable = false;
-                canHaveKey = true;
-                player = Game.players.get(0); // should be first in array if autopropping
-                player.col = col;
-                player.row = row;
-                break;
+            //no 3, this is player (attribute a cell has)
+//            case 3:
+//                // player
+//                // in level editor, sets to empty cell with player!
+//                red = 0;
+//                green = 1;
+//                blue = 0;
+//                labelled = true;
+//                customLabel = false;
+//                passable = false;
+//                canHaveKey = true;
+//                player = Game.players.get(0); // should be first in array if autopropping
+//                player.col = col;
+//                player.row = row;
+//                break;
             case 4:
                 // open door
                 red = 0.6f;
@@ -197,9 +211,17 @@ public class Cell {
 
     public void setType(int cellType) {
         // sets type and formats cell
-        // will clear key if this is called (setCell in Game will not call if giving key)
+        // will clear key if this is called (setCell in Game will not call if giving key or player)
         this.cellType = cellType;
-        autoProp(true);
+        autoProp(true,true);
+    }
+
+    public boolean getPassable() {
+        // returns of cell is passable, and has no player!
+        if (passable && player == null) {
+            return true;
+        }
+        return false;
     }
 
     public int getType() {
@@ -213,12 +235,21 @@ public class Cell {
         this.alpha = alpha;
     }
 
-    public float[] getRGBA() {
+    public float[] getRGBA(boolean noPlayer) {
         // gets color, including "selected color"
+        // puts to green if has a player! (still standing on button or whatever)
         float[] RGBA = new float[4];
-        RGBA[0] = red;
-        RGBA[1] = green;
-        RGBA[2] = blue;
+        if (player == null || noPlayer) {
+            //real color
+            RGBA[0] = red;
+            RGBA[1] = green;
+            RGBA[2] = blue;
+        } else {
+            //player color
+            RGBA[0] = 0;
+            RGBA[1] = 1;
+            RGBA[2] = 0;
+        }
         if (selected) {
             RGBA[3] = selAlpha;
         } else {
@@ -228,38 +259,114 @@ public class Cell {
         return RGBA;
     }
 
+    public boolean hasPlayer() {
+        // returns true if the cell has a player
+        if (player != null) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean hasMovingPlayer() {
+        if (player == null) {
+            return false;
+        } else if (player.willMove) {
+            return true;
+        }
+        return false;
+    }
+
     public static String getCellName(int type) {
         // gets name of cell with this type
+        // may be passed a cell
+        String r = "";
         switch (type) {
             case 0:
-                return "Empty Space";
+                r = "Empty Space";
+                break;
             case 1:
-                return "Wall";
+                r = "Wall";
+                break;
             case 2:
-                return "Button";
+                r = "Button";
+                break;
             case 3:
-                return "Player";
+                r = "Player"; //not a cell type... hmm...
+                break;
             case 4:
-                return "Open Door";
+                r = "Open Door";
+                break;
             case 5:
-                return "Closed Door";
+                r = "Closed Door";
+                break;
             case 6:
-                return "Locked Door";
+                r = "Locked Door";
+                break;
             case 7:
-                return "Key"; //not a cell type... set this for editor
+                r = "Key"; //not a cell type... set this for editor
+                break;
             case 8:
-                return "Time Machine";
+                r = "Time Machine";
+                break;
             case 9:
-                return "Exit";
+                r = "Exit";
+                break;
             default:
                 return "INVALID CELL TYPE";
         }
+        return r;
+    }
+
+    public String getThisCellName() {
+        // gets name of THIS cell (nonstatic)
+        String r = "";
+        switch (cellType) {
+            case 0:
+                r = "Empty Space";
+                break;
+            case 1:
+                r = "Wall";
+                break;
+            case 2:
+                r = "Button";
+                break;
+            case 3:
+                r = "Player"; //not a cell type... hmm...
+                break;
+            case 4:
+                r = "Open Door";
+                break;
+            case 5:
+                r = "Closed Door";
+                break;
+            case 6:
+                r = "Locked Door";
+                break;
+            case 7:
+                r = "Key"; //not a cell type... set this for editor
+                break;
+            case 8:
+                r = "Time Machine";
+                break;
+            case 9:
+                r = "Exit";
+                break;
+            default:
+                return "INVALID CELL TYPE";
+        }
+        if(player != null) {
+            r += " with Player";
+        }
+        if(hasKey) {
+            r += " with Key";
+        }
+        return r;
     }
 
     public void setKey(String key) {
         this.key = key;
         Boolean hasKey = true;
-        if(player != null) {
+        if (player != null) {
             player.key = key;
         }
     }

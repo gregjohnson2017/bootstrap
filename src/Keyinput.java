@@ -275,7 +275,7 @@ public class Keyinput implements KeyListener {
                 //SPACE key
                 switch (Game.gameMode) {
                     case 0:
-                        // advance timestep
+                        // advance timestep (or at least tries to)
                         Game.advanceTimestep();
                         break;
                     case 1:

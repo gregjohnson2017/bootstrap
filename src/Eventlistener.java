@@ -11,8 +11,10 @@ public class Eventlistener implements GLEventListener {
     public static GL2 gl = null;
     private double rot = 0;
     private double rad = 0;
+    private static double moveGhost = 0; // move ghosting, from 0 to 1. Always incrementing
 
-    private double moveGhost = 0; // move ghosting, from 0 to 1. Always incrementing
+    public static boolean moveAnimation = false; // will do one opaque move animation if true
+    public static boolean moveAnimationBegun = false; // start from beginning
 
     public static boolean pauseRendering = false;
 
@@ -42,6 +44,11 @@ public class Eventlistener implements GLEventListener {
                 rad = 1;
                 rot = 0;
                 outroAnimationBegun = true;
+            }
+            if (moveAnimation && !moveAnimationBegun) {
+                //resets moveGhost
+                moveGhost = 0;
+                moveAnimationBegun = true;
             }
 
             gl = drawable.getGL().getGL2();
@@ -81,20 +88,22 @@ public class Eventlistener implements GLEventListener {
                     String label = null;
                     String key = null;
                     String age = null;
+                    Boolean drawOld = false;
+                    Cell c = null;
                     if (Game.hasCell(i, j)) {
-                        Cell c = Game.getCell(i, j);
-                        RGBA = c.getRGBA();
+                        c = Game.getCell(i, j);
+                        RGBA = c.getRGBA(false);
                         if (c.labelled && !introAnimation && !outroAnimation) {
                             label = c.label;
                         }
                         if (c.hasKey && !introAnimation && !outroAnimation) {
                             key = c.getKey();
                         }
-                        if (c.getType() == 3 && c.player != null && !introAnimation && !outroAnimation
+                        if (c.player != null && !introAnimation && !outroAnimation
                                 && Game.gameMode == 0) {
                             age = c.player.getAge(); // does not show in editor
                             // if it gets this far, also checks for ghost
-                            if (c.player.willMove) {
+                            if (c.hasMovingPlayer()) {
                                 // oh boy! draws a spooky ghost.
                                 double mi = c.player.mRow;
                                 double mj = c.player.mCol;
@@ -103,13 +112,23 @@ public class Eventlistener implements GLEventListener {
                                 } else {
                                     b = 0;
                                 }
-                                // sets alpha to new thing really quick
-                                RGBA[3] = (float) (1 - moveGhost);
-                                Graphics.drawCells(((2 * j + a) * (1 - moveGhost)) + ((2 * mj + b) * (moveGhost)),
-                                        ((1.75 * i) * (1 - moveGhost)) + ((1.75 * mi) * (moveGhost)), rad, rot, RGBA,
-                                        null, null, null);
+                                // sets alpha to new thing really quick if not doing moveAnimation
+                                if (!moveAnimation) {
+                                    RGBA[3] = (float) (1 - moveGhost);
+                                    Graphics.drawCells(((2 * j + a) * (1 - moveGhost)) + ((2 * mj + b) * (moveGhost)),
+                                            ((1.75 * i) * (1 - moveGhost)) + ((1.75 * mi) * (moveGhost)), rad, rot, RGBA,
+                                            null, null, null);
+                                } else {
+                                    // does same but with age and key (if holding) - still no label, that's old cell
+                                    // player cannot leave key behind, automatically holding
+                                    RGBA[3] = 1;
+                                    Graphics.drawCells(((2 * j + a) * (1 - moveGhost)) + ((2 * mj + b) * (moveGhost)),
+                                            ((1.75 * i) * (1 - moveGhost)) + ((1.75 * mi) * (moveGhost)), rad, rot, RGBA,
+                                            null, key, age);
+                                    drawOld = true; // draws old cell where player used to be
+                                }
                                 // sets alpha back
-                                RGBA[3] = c.getRGBA()[3];
+                                RGBA[3] = c.getRGBA(false)[3];
                             }
                         }
                     } else {
@@ -118,7 +137,15 @@ public class Eventlistener implements GLEventListener {
                         RGBA[2] = 0;
                         RGBA[3] = 1;
                     }
-                    Graphics.drawCells(2 * j + a, 1.75 * i, rad, rot, RGBA, label, key, age);
+                    //if this was a player moving, does not render where the player was
+                    if (drawOld) {
+                        //draws empty tile in the player's place
+                        //assumes c has been defined above
+                        RGBA = c.getRGBA(true);
+                        Graphics.drawCells(2 * j + a, 1.75 * i, rad, rot, RGBA, label, key, null);
+                    } else {
+                        Graphics.drawCells(2 * j + a, 1.75 * i, rad, rot, RGBA, label, key, age);
+                    }
                 }
             }
 
@@ -174,6 +201,15 @@ public class Eventlistener implements GLEventListener {
                 moveGhost += 0.02;
             } else {
                 moveGhost = 0;
+                // finished with animation
+                // this also finishes the timestep advance if any players needed to move
+                if (moveAnimation) {
+                    moveAnimation = false;
+                    moveAnimationBegun = false;
+                    // has game class finalize motions
+                    Game.finishTimestep();
+                }
+
             }
 
         }

@@ -33,6 +33,7 @@ public class Game {
     public static int command = 0; // command in game (move or interact)
 
     public static int currentTimestep = 0; // current time step
+    public static boolean lockTimestep = false;
 
     public static int highestBootnum = 0; // highest bootnum of any player (needs to be kept updated...!)
     public static ArrayList<Player> players = new ArrayList<Player>(); // array of players
@@ -262,8 +263,10 @@ public class Game {
     public static void clearCellOfType(int type) {
         // removes first appearance of this cell
         // called to remove unique cells, so this should suffice
+        // also checks if type = 3, means set player to empty cell
         for (Cell c : cells) {
-            if (c.getType() == type) {
+            if (c.getType() == type || (type == 3 && c.player != null)) {
+                c.player = null;
                 c.setType(0);
             }
         }
@@ -280,7 +283,7 @@ public class Game {
                 s += "Timestep: " + currentTimestep;
                 // now selected cell
                 if (selected) {
-                    s += " | Selected: " + selectedCell.getCellName(selectedCell.getType());
+                    s += " | Selected: " + selectedCell.getThisCellName();
                 } else {
                     s += " | No Selection";
                 }
@@ -312,17 +315,47 @@ public class Game {
 
     public static void advanceTimestep() {
         // code for advancing timestep including animations, new grid, etc.
-        // if this is the first timestep, adds first player to players array
+        // tells eventlistener to do animation IF anything is moving
+        // only does this if not locked! (in animation for example)
+        if(!lockTimestep) {
+            lockTimestep = true;
+            boolean movingPlayers = false;
+            for (Cell c : cells) {
+                if (c.hasMovingPlayer()) {
+                    Eventlistener.moveAnimation = true;
+                    // eventlistener will tell Game to finish timestpe
+                    movingPlayers = true;
+                    break;
+                }
+            }
+            if (!movingPlayers) {
+                // this method will finish timestep
+                finishTimestep();
+            }
+            // advances timestep integer
+            currentTimestep++;
+        }
+    }
 
-
-        // advances timestep integer
-        currentTimestep++;
+    public static void finishTimestep() {
+        // updates cell array and stuff for moving players
+        for(Cell c: cells) {
+            if(c.hasMovingPlayer()) {
+                // gives player to new cell, removes from old
+                Cell d = getCell(c.player.mRow,c.player.mCol);
+                d.player = c.player;
+                d.player.move();
+                c.player = null;
+            }
+        }
+        // unlocks
+        lockTimestep = false;
     }
 
     public static void setCell(Cell c, int type) {
         // sets this cell to this type
-        // except for keys! these are handled differently.
-        if (type != 7) {
+        // except for keys and players! these are handled differently.
+        if (type != 7 && type != 3) {
             c.setType(type);
         }
         // must be in level editor, and either be labelling something OR be giving a key and be allowed to do so
@@ -357,6 +390,11 @@ public class Game {
                 c.setKey(proposedLabel);
             }
         }
+        // otherwise, is setting to player (on empty space)
+        if(type == 3) {
+            c.setType(0);
+            c.player = players.get(0);
+        }
 
     }
 
@@ -364,8 +402,7 @@ public class Game {
         // checks adjacency between cells
         // returns false if same cell!
         if (c1.row == c2.row && Math.abs(c1.col - c2.col) == 1) {
-            // same row, one appart
-            System.out.println("same row");
+            // same row, one apart
             return true;
         }
         // otherwise, has to switch on parity of first cell's row

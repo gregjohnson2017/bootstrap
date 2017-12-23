@@ -25,4 +25,11 @@ public class Player {
         age += "" + (Game.currentTimestep - birthday);
         return age;
     }
+
+    public void move() {
+        // moves
+        row = mRow;
+        col = mCol;
+        willMove = false;
+    }
 }

@@ -38,8 +38,6 @@ public class Mouseinput implements MouseListener {
             }
             int clickHexCol = Math.round((clickUnitXfromCenter - 1f + a) / 2);
 
-            System.out.println(clickHexRow + ", " + clickHexCol);
-
             // checks to see if in bounds
             if (-Game.gridRows / 2 <= clickHexRow && clickHexRow < (float) Game.gridRows / 2
                     && -Game.gridCols / 2 <= clickHexCol && clickHexCol < (float) Game.gridCols / 2) {
@@ -59,7 +57,7 @@ public class Mouseinput implements MouseListener {
                                     // no selected cell yet, don't try any movements!
                                     break;
                                 }
-                                if(targ.passable && !targ.hasMovePlanned
+                                if(targ.getPassable() && !targ.hasMovePlanned
                                         && Game.checkAdjacent(targ,s) && s.player != null) {
                                     // possible move!
                                     s.player.willMove = true;

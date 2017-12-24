@@ -189,6 +189,10 @@ public class Game {
 
         }
 
+        if (currentLevelString.isEmpty()) {
+            return false;
+        }
+
         // gets new cells, either from current level to restart or new level from above file read
         newCellsFromString(currentLevelString);
 
